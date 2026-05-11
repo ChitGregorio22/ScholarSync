@@ -77,9 +77,12 @@ export async function createCourse(course: {
   target_grade?: string;
   description?: string;
 }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from('courses')
-    .insert(course)
+    .insert({ ...course, user_id: user.id })
     .select()
     .single();
   
@@ -143,9 +146,12 @@ export async function createAssessment(assessment: {
   date?: string;
   notes?: string;
 }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from('assessments')
-    .insert(assessment)
+    .insert({ ...assessment, user_id: user.id })
     .select()
     .single();
   
@@ -208,9 +214,12 @@ export async function createStudyLog(studyLog: {
   notes?: string;
   topics_covered?: string;
 }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from('study_logs')
-    .insert(studyLog)
+    .insert({ ...studyLog, user_id: user.id })
     .select()
     .single();
   
@@ -247,9 +256,12 @@ export async function saveChatMessage(message: {
   content: string;
   context?: object;
 }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from('chat_history')
-    .insert(message)
+    .insert({ ...message, user_id: user.id })
     .select()
     .single();
   
@@ -304,8 +316,11 @@ export async function updateProfile(updates: {
 // ============================================
 
 export async function getStudentDataForAI() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
-    .rpc('get_student_data_for_ai');
+    .rpc('get_student_data_for_ai', { p_user_id: user.id });
   
   if (error) throw error;
   return data;

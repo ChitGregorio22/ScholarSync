@@ -18,20 +18,35 @@ export default function App() {
   // Initialize auth state and load data
   useEffect(() => {
     const initAuth = async () => {
+      // Safety timeout: stop loading after 5 seconds no matter what
+      const timeoutId = setTimeout(() => {
+        console.warn("Auth initialization timed out, forcing loading to false");
+        setLoading(false);
+      }, 5000);
+
       try {
-        // Check for existing session
-        const session = await getSession();
+        console.log("Auth session check...");
+        // Use Promise.race to prevent indefinite hanging
+        const session = await Promise.race([
+          getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000))
+        ]) as any;
+        
+        console.log("Session:", session ? "Found" : "Not found");
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Load courses from Supabase
+          console.log("Loading courses...");
           const courses = await getCourses();
+          console.log("Courses loaded:", courses.length);
           setSubjects(courses);
           setPage("dashboard");
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
+        clearTimeout(timeoutId);
+        console.log("Setting loading to false");
         setLoading(false);
       }
     };
@@ -83,6 +98,15 @@ export default function App() {
     }
   };
 
+  // Listen for custom page switch events
+  useEffect(() => {
+    const handleSwitchPage = (e: any) => {
+      setPage(e.detail);
+    };
+    window.addEventListener('switchPage', handleSwitchPage as EventListener);
+    return () => window.removeEventListener('switchPage', handleSwitchPage as EventListener);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0f1115] text-white flex items-center justify-center">
@@ -98,7 +122,7 @@ export default function App() {
     <div className="flex min-h-screen bg-[#0f1115] text-white">
 
       {/* SIDEBAR (hidden on home) */}
-      {page !== "home" && <Sidebar setPage={setPage} />}
+      {page !== "home" && <Sidebar setPage={setPage} currentPage={page} onLogout={handleLogout} />}
 
       {/* MAIN CONTENT */}
       <div className="flex-1 p-4">
@@ -114,7 +138,6 @@ export default function App() {
         {page === "dashboard" && (
           <Dashboard
             subjects={subjects}
-            setSubjects={setSubjects}
             user={user}
           />
         )}
@@ -122,7 +145,6 @@ export default function App() {
         {/* GRADES */}
         {page === "grades" && (
           <Grades
-            subjects={subjects}
             onSubjectsChange={refreshSubjects}
             onLogout={handleLogout}
           />
