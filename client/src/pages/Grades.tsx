@@ -142,15 +142,20 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
   };
 
   const addStudyLog = async () => {
-    if (!studyCourseId || !studyHours) return;
+    console.log("Attempting to add study log:", { studyCourseId, studyHours, studyDate });
+    if (!studyCourseId || !studyHours) {
+      console.warn("Missing required fields for study log");
+      return;
+    }
     setSaving(true);
     try {
-      await createStudyLog({
+      const result = await createStudyLog({
         course_id: studyCourseId,
         hours_studied: parseFloat(studyHours),
         date: studyDate,
         notes: studyNotes || undefined
       });
+      console.log("Study log added successfully:", result);
       setStudyHours("");
       setStudyNotes("");
       await loadData();

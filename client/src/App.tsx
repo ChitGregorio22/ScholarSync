@@ -7,11 +7,13 @@ import Grades from "./pages/Grades";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
 import ChatHistory from "./pages/ChatHistory";
-import { supabase, getSession, signOut, getCourses } from "./lib/supabase-simple";
+import { supabase, getSession, signOut, getCourses, getStudyLogs, getAssessments } from "./lib/supabase-simple";
 
 export default function App() {
   const [page, setPage] = useState("home");
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [studyLogs, setStudyLogs] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,8 +47,20 @@ export default function App() {
         
         if (session?.user) {
           setPage("dashboard");
-          const courses = await getCourses();
+          const [courses, allLogs] = await Promise.all([
+            getCourses(),
+            getStudyLogs()
+          ]);
           setSubjects(courses);
+          setStudyLogs(allLogs);
+          
+          // Fetch assessments for all courses
+          if (courses.length > 0) {
+            const allAssessments = await Promise.all(
+              courses.map((c: any) => getAssessments(c.id))
+            );
+            setAssessments(allAssessments.flat());
+          }
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -63,10 +77,23 @@ export default function App() {
       async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          const courses = await getCourses();
+          const [courses, allLogs] = await Promise.all([
+            getCourses(),
+            getStudyLogs()
+          ]);
           setSubjects(courses);
+          setStudyLogs(allLogs);
+
+          if (courses.length > 0) {
+            const allAssessments = await Promise.all(
+              courses.map((c: any) => getAssessments(c.id))
+            );
+            setAssessments(allAssessments.flat());
+          }
         } else {
           setSubjects([]);
+          setStudyLogs([]);
+          setAssessments([]);
           setPage("home");
         }
       }
@@ -80,14 +107,23 @@ export default function App() {
     console.log("Login success handler called with user:", userData.email);
     setUser(userData);
     try {
-      console.log("Fetching courses for new user...");
-      const courses = await getCourses();
-      console.log("Found courses:", courses.length);
+      console.log("Fetching data for new user...");
+      const [courses, allLogs] = await Promise.all([
+        getCourses(),
+        getStudyLogs()
+      ]);
       setSubjects(courses);
+      setStudyLogs(allLogs);
+
+      if (courses.length > 0) {
+        const allAssessments = await Promise.all(
+          courses.map((c: any) => getAssessments(c.id))
+        );
+        setAssessments(allAssessments.flat());
+      }
     } catch (e) {
-      console.error("Error fetching courses after login:", e);
+      console.error("Error fetching data after login:", e);
     }
-    console.log("Switching to dashboard...");
     setPage("dashboard");
   };
 
@@ -103,11 +139,22 @@ export default function App() {
     }
   };
 
-  // Refresh subjects data
-  const refreshSubjects = async () => {
+  // Refresh all data
+  const refreshData = async () => {
     if (user) {
-      const courses = await getCourses();
+      const [courses, allLogs] = await Promise.all([
+        getCourses(),
+        getStudyLogs()
+      ]);
       setSubjects(courses);
+      setStudyLogs(allLogs);
+
+      if (courses.length > 0) {
+        const allAssessments = await Promise.all(
+          courses.map((c: any) => getAssessments(c.id))
+        );
+        setAssessments(allAssessments.flat());
+      }
     }
   };
 
@@ -157,6 +204,7 @@ export default function App() {
         {page === "dashboard" && (
           <Dashboard
             subjects={subjects}
+            studyLogs={studyLogs}
             user={user}
           />
         )}
@@ -164,7 +212,7 @@ export default function App() {
         {/* GRADES */}
         {page === "grades" && (
           <Grades
-            onSubjectsChange={refreshSubjects}
+            onSubjectsChange={refreshData}
             onLogout={handleLogout}
           />
         )}

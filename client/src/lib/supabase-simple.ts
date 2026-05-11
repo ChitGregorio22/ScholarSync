@@ -1,5 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
+// --- TYPES ---
+export interface Course {
+  id: string;
+  course_name: string;
+  course_code?: string;
+  credits?: number;
+  target_grade?: string;
+  description?: string;
+  created_at?: string;
+}
+
+export interface StudyLog {
+  id: string;
+  course_id: string;
+  hours_studied: number;
+  date: string;
+  notes?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at?: string;
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const API_URL = 'http://localhost:5000/api';
@@ -72,22 +98,39 @@ export async function getSession() {
 }
 
 // ============================================
+// DATA FETCHING HELPERS
+// ============================================
+
+async function getAuthToken() {
+  const session = await getSession();
+  return session?.access_token;
+}
+
+async function proxyFetch(endpoint: string, options: any = {}) {
+  const token = await getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(options.headers || {})
+  };
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw data;
+  return data;
+}
+
+// ============================================
 // COURSES CRUD (Using Local Backend)
 // ============================================
 
 export async function getCourses() {
-  const session = await getSession();
-  if (!session) return [];
-
   try {
-    const response = await fetch(`${API_URL}/courses`, {
-      headers: { 
-        'Authorization': `Bearer ${session.access_token}`
-      }
-    });
-    const data = await response.json();
-    if (!response.ok) throw data;
-    
+    const data = await proxyFetch('/courses');
     localStorage.setItem('ss_cached_courses', JSON.stringify(data));
     return data;
   } catch (error) {
@@ -96,169 +139,98 @@ export async function getCourses() {
   }
 }
 
-// Add other CRUD operations as needed...
-// For now, let's keep the remaining functions using the direct client 
-// as they are less likely to hang once the session is established.
-
-export async function createCourse(course: {
-  course_name: string;
-  course_code?: string;
-  credits?: number;
-  target_grade?: string;
-  description?: string;
-}) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from('courses')
-    .insert({ ...course, user_id: user.id })
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
+export async function createCourse(course: any) {
+  return proxyFetch('/courses', {
+    method: 'POST',
+    body: JSON.stringify(course)
+  });
 }
 
 export async function updateCourse(id: string, updates: any) {
-  const { data, error } = await supabase
-    .from('courses')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  // We can add PATCH to server if needed, or use POST for now
+  // For simplicity, let's just use the server's existing endpoints
+  return proxyFetch(`/courses/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates)
+  });
 }
 
 export async function deleteCourse(id: string) {
-  const { error } = await supabase.from('courses').delete().eq('id', id);
-  if (error) throw error;
+  return proxyFetch(`/courses/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
-// ASSESSMENTS CRUD
+// ASSESSMENTS CRUD (Using Local Backend)
 // ============================================
 
 export async function getAssessments(courseId: string) {
-  const { data, error } = await supabase
-    .from('assessments')
-    .select('*')
-    .eq('course_id', courseId)
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  return data || [];
+  return proxyFetch(`/assessments/${courseId}`);
 }
 
 export async function createAssessment(assessment: any) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from('assessments')
-    .insert({ ...assessment, user_id: user?.id })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return proxyFetch('/assessments', {
+    method: 'POST',
+    body: JSON.stringify(assessment)
+  });
 }
 
 export async function updateAssessment(id: string, updates: any) {
-  const { data, error } = await supabase
-    .from('assessments')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return proxyFetch(`/assessments/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates)
+  });
 }
 
 export async function deleteAssessment(id: string) {
-  const { error } = await supabase.from('assessments').delete().eq('id', id);
-  if (error) throw error;
+  return proxyFetch(`/assessments/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
-// STUDY LOGS CRUD
+// STUDY LOGS CRUD (Using Local Backend)
 // ============================================
 
 export async function getStudyLogs(courseId?: string) {
-  let query = supabase.from('study_logs').select('*').order('date', { ascending: false });
-  if (courseId) query = query.eq('course_id', courseId);
-  const { data, error } = await query;
-  if (error) throw error;
-  return data || [];
+  const url = courseId ? `/study-logs?courseId=${courseId}` : '/study-logs';
+  return proxyFetch(url);
 }
 
 export async function createStudyLog(log: any) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from('study_logs')
-    .insert({ ...log, user_id: user?.id })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return proxyFetch('/study-logs', {
+    method: 'POST',
+    body: JSON.stringify(log)
+  });
 }
 
 export async function deleteStudyLog(id: string) {
-  const { error } = await supabase.from('study_logs').delete().eq('id', id);
-  if (error) throw error;
+  return proxyFetch(`/study-logs/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
-// PROFILE & CHAT
+// PROFILE & CHAT (Using Local Backend)
 // ============================================
 
 export async function getProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-  if (error) throw error;
-  return data;
+  return proxyFetch('/profile');
 }
 
 export async function updateProfile(updates: any) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', user?.id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return proxyFetch('/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(updates)
+  });
 }
 
 export async function getChatHistory() {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from('chat_history')
-    .select('*')
-    .eq('user_id', user?.id)
-    .order('created_at', { ascending: true });
-  if (error) throw error;
-  return data || [];
+  return proxyFetch('/chat/history');
 }
 
 export async function saveChatMessage(message: any) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from('chat_history')
-    .insert({ ...message, user_id: user?.id })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return proxyFetch('/chat', {
+    method: 'POST',
+    body: JSON.stringify(message)
+  });
 }
 
 export async function getStudentDataForAI() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  // Use the RPC call we defined in schema
-  const { data, error } = await supabase.rpc('get_student_data_for_ai', { 
-    p_user_id: user.id 
-  });
-  if (error) throw error;
-  return data;
+  return proxyFetch('/ai/student-data');
 }
