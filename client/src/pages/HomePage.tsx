@@ -60,13 +60,13 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
       if (isLogin) {
         const data = await Promise.race([
           signIn(email, password),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), 10000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), 28000))
         ]) as any;
         onLoginSuccess(data.user);
       } else {
         const data = await Promise.race([
           signUp(email, password, fullName),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), 10000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), 28000))
         ]) as any;
         onLoginSuccess(data.user);
       }

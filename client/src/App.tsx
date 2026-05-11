@@ -18,35 +18,40 @@ export default function App() {
   // Initialize auth state and load data
   useEffect(() => {
     const initAuth = async () => {
-      // Safety timeout: stop loading after 5 seconds no matter what
-      const timeoutId = setTimeout(() => {
-        console.warn("Auth initialization timed out, forcing loading to false");
+      // Global safety timeout: definitely stop loading after 5 seconds
+      const globalTimeout = setTimeout(() => {
+        console.warn("Global init timeout reached");
         setLoading(false);
       }, 5000);
 
+      console.log("Checking server connection...");
+      try {
+        const healthRes = await Promise.race([
+          fetch('http://localhost:5000/api/health'),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Health check timeout")), 2000))
+        ]) as any;
+        const healthData = await healthRes.json();
+        console.log("Server health:", healthData.status);
+      } catch (e) {
+        console.warn("Could not reach local server quickly. Continuing...");
+      }
+
       try {
         console.log("Auth session check...");
-        // Use Promise.race to prevent indefinite hanging
-        const session = await Promise.race([
-          getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000))
-        ]) as any;
+        const session = await getSession();
         
         console.log("Session:", session ? "Found" : "Not found");
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log("Loading courses...");
-          const courses = await getCourses();
-          console.log("Courses loaded:", courses.length);
-          setSubjects(courses);
           setPage("dashboard");
+          const courses = await getCourses();
+          setSubjects(courses);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
-        clearTimeout(timeoutId);
-        console.log("Setting loading to false");
+        clearTimeout(globalTimeout);
         setLoading(false);
       }
     };
@@ -72,9 +77,17 @@ export default function App() {
 
   // Handle login success
   const handleLoginSuccess = async (userData: any) => {
+    console.log("Login success handler called with user:", userData.email);
     setUser(userData);
-    const courses = await getCourses();
-    setSubjects(courses);
+    try {
+      console.log("Fetching courses for new user...");
+      const courses = await getCourses();
+      console.log("Found courses:", courses.length);
+      setSubjects(courses);
+    } catch (e) {
+      console.error("Error fetching courses after login:", e);
+    }
+    console.log("Switching to dashboard...");
     setPage("dashboard");
   };
 
@@ -109,10 +122,16 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f1115] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0f1115] text-white flex items-center justify-center font-sans">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading ScholarSync...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
+          <p className="text-gray-400">Initializing ScholarSync...</p>
+          <button 
+            onClick={() => setLoading(false)}
+            className="mt-8 text-xs text-gray-600 hover:text-gray-400 transition-colors underline"
+          >
+            Skip loading (Debug mode)
+          </button>
         </div>
       </div>
     );
