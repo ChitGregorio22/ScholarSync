@@ -102,23 +102,55 @@ app.get('/api/courses', async (req, res) => {
 
 // --- AI ADVICE ---
 
-app.post('/api/ai/advice', async (req, res) => {
-  const { prompt, history } = req.body;
+// Diagnostic endpoint to see what models your key can access
+app.get('/api/ai/models', async (req, res) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const chat = model.startChat({
-      history: history.map((h: any) => ({
-        role: h.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: h.content }]
-      }))
-    });
-
-    const result = await chat.sendMessage(prompt);
-    const response = await result.response;
-    res.json({ text: response.text() });
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+    const data = await response.json();
+    res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post('/api/ai/advice', async (req, res) => {
+  const { prompt, history, modelType } = req.body;
+  
+  // List of models based on your diagnostic results
+  const modelsToTry = modelType ? [modelType] : [
+    "gemini-2.5-flash", 
+    "gemini-2.5-pro", 
+    "gemini-2.0-flash",
+    "gemini-flash-latest",
+    "gemini-pro-latest"
+  ];
+  
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`Trying AI model: ${modelName}...`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      
+      const chat = model.startChat({
+        history: (history || []).map((h: any) => ({
+          role: h.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: h.content }]
+        }))
+      });
+
+      const result = await chat.sendMessage(prompt);
+      const response = await result.response;
+      console.log(`Success with model: ${modelName}`);
+      return res.json({ text: response.text() });
+    } catch (err: any) {
+      console.error(`Model ${modelName} failed with error:`, err.message);
+      // If it's a 404 or 400, continue to next model. 
+      if (!err.message.includes('404') && !err.message.includes('not found') && !err.message.includes('400')) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+  }
+
+  res.status(404).json({ error: "No working AI models found. Please check your API key and permissions." });
 });
 
 app.listen(port, () => {

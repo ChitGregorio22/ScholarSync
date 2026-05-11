@@ -192,3 +192,5 @@ export interface Database {
     }
   }
 }
+
+export type ChatMessage = Database['public']['Tables']['chat_history']['Row'];

@@ -64,7 +64,8 @@ export function formatStudentContext(context: StudentContext): string {
 export async function getAIAdvice(
   studentContext: StudentContext,
   userMessage: string,
-  chatHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  chatHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+  modelType?: string
 ): Promise<string> {
   try {
     const formattedContext = formatStudentContext(studentContext);
@@ -73,7 +74,7 @@ export async function getAIAdvice(
     const response = await fetch(`${API_URL}/ai/advice`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, history: chatHistory })
+      body: JSON.stringify({ prompt, history: chatHistory, modelType })
     });
 
     const data = await response.json();

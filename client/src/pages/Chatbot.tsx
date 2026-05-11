@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { getStudentDataForAI, saveChatMessage, getChatHistory, type ChatMessage } from "../lib/supabase-simple";
+import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
+import type { ChatMessage } from "../types/supabase";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Sparkles, 
-  ChevronLeft, 
-  History, 
-  Maximize2, 
+import {
+  Send,
+  Bot,
+  User,
+  ChevronLeft,
+  History,
+  Maximize2,
   Minimize2,
-  BrainCircuit,
   Lightbulb,
   Target,
   Clock,
@@ -46,6 +45,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Load chat history on mount
@@ -60,7 +60,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
 
   const loadChatHistory = async () => {
     try {
-      const history = await getChatHistory(50);
+      const history = await getChatHistory();
       if (history.length > 0) {
         const formattedMessages: Message[] = history.map((msg: ChatMessage) => ({
           id: msg.id,
@@ -104,12 +104,13 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
       });
 
       const studentData = await getStudentDataForAI();
-      const chatHistoryForAI = messages.map((msg) => ({
-        role: msg.sender === "user" ? "user" as const : "assistant" as const,
-        content: msg.text,
-      }));
 
-      const aiResponse = await getAIAdvice(studentData, messageText, chatHistoryForAI);
+      const aiResponse = await getAIAdvice(
+        studentData,
+        messageText,
+        messages.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+        selectedModel
+      );
 
       await saveChatMessage({
         role: "assistant",
@@ -127,7 +128,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err: any) {
       console.error("Error getting AI response:", err);
-      
+
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
@@ -142,7 +143,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className={`flex flex-col bg-bg-dark text-white rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl border border-white/5 ${isFullscreen ? 'fixed inset-4 z-[100]' : 'h-[calc(100vh-2rem)]'}`}>
-      
+
       {/* HEADER */}
       <header className="p-5 flex justify-between items-center bg-bg-card border-b border-white/5 backdrop-blur-md bg-opacity-80">
         <div className="flex items-center gap-4">
@@ -151,32 +152,38 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
               <ChevronLeft className="w-5 h-5" />
             </button>
           )}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-brand-primary/20 flex items-center justify-center border border-brand-primary/30">
-                <BrainCircuit className="w-7 h-7 text-brand-primary" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-bg-card rounded-full shadow-lg" />
+          <div className="flex items-center gap-4">
+            <div className="bg-brand-primary/10 p-2.5 rounded-2xl">
+              <Bot className="w-6 h-6 text-brand-primary" />
             </div>
             <div>
-              <h1 className="font-bold text-lg tracking-tight flex items-center gap-2">
-                ScholarSync AI
-                <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
-              </h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Academic Advisor • Online</p>
+              <h2 className="text-lg font-bold tracking-tight">AI Academic Advisor</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="bg-transparent text-[10px] text-gray-400 border-none focus:ring-0 p-0 cursor-pointer hover:text-white transition-colors uppercase tracking-widest font-bold"
+                >
+                  <option value="gemini-2.5-flash" className="bg-bg-card">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.5-pro" className="bg-bg-card">Gemini 2.5 Pro</option>
+                  <option value="gemma-4-31b-it" className="bg-bg-card">Gemma 4 (31B)</option>
+                  <option value="gemini-flash-latest" className="bg-bg-card">Latest Flash</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setIsFullscreen(!isFullscreen)} 
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
-          <button 
+          <button
             className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
             title="View History"
           >
@@ -200,13 +207,12 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
                   <Bot className="w-4 h-4 text-brand-primary" />
                 </div>
               )}
-              
+
               <div className={`relative group max-w-[80%] md:max-w-[70%] ${msg.sender === "user" ? "order-1" : "order-2"}`}>
-                <div className={`px-5 py-4 rounded-3xl shadow-sm text-sm leading-relaxed ${
-                  msg.sender === "user"
-                    ? "bg-brand-primary text-white rounded-br-none"
-                    : "bg-white/5 border border-white/5 text-gray-200 rounded-bl-none"
-                }`}>
+                <div className={`px-5 py-4 rounded-3xl shadow-sm text-sm leading-relaxed ${msg.sender === "user"
+                  ? "bg-brand-primary text-white rounded-br-none"
+                  : "bg-white/5 border border-white/5 text-gray-200 rounded-bl-none"
+                  }`}>
                   {msg.text}
                 </div>
                 <span className={`text-[10px] text-gray-600 font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
@@ -224,7 +230,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
         </AnimatePresence>
 
         {loading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-start gap-3"
@@ -245,7 +251,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
       {/* QUICK SUGGESTIONS */}
       <AnimatePresence>
         {messages.length < 3 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, height: 0 }}
@@ -298,4 +304,4 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
     </div>
   );
 }
-
+
