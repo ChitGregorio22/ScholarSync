@@ -7,55 +7,92 @@ import Grades from "./pages/Grades";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
 import ChatHistory from "./pages/ChatHistory";
+import { supabase, getSession, signOut, getCourses } from "./lib/supabase-simple";
 
 export default function App() {
   const [page, setPage] = useState("home");
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // load subjects
+  // Initialize auth state and load data
   useEffect(() => {
-    const saved = localStorage.getItem("subjects");
-    if (saved) setSubjects(JSON.parse(saved));
+    const initAuth = async () => {
+      try {
+        // Check for existing session
+        const session = await getSession();
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Load courses from Supabase
+          const courses = await getCourses();
+          setSubjects(courses);
+          setPage("dashboard");
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const courses = await getCourses();
+          setSubjects(courses);
+        } else {
+          setSubjects([]);
+          setPage("home");
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // save subjects
-  useEffect(() => {
-    localStorage.setItem("subjects", JSON.stringify(subjects));
-  }, [subjects]);
-
-  // load chat history
-  useEffect(() => {
-    const savedChat = localStorage.getItem("chatHistory");
-    if (savedChat) setChatHistory(JSON.parse(savedChat));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-  }, [chatHistory]);
-
-  // 🔥 LOGIN / REGISTER HANDLERS
-  const handleLogin = (data: any) => {
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
+  // Handle login success
+  const handleLoginSuccess = async (userData: any) => {
+    setUser(userData);
+    const courses = await getCourses();
+    setSubjects(courses);
     setPage("dashboard");
   };
 
-  const handleRegister = (data: any) => {
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
-    setPage("dashboard");
-  };
-
-  // optional: restore user session
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setPage("dashboard");
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setUser(null);
+      setSubjects([]);
+      setPage("home");
+    } catch (error) {
+      console.error("Logout error:", error);
     }
-  }, []);
+  };
+
+  // Refresh subjects data
+  const refreshSubjects = async () => {
+    if (user) {
+      const courses = await getCourses();
+      setSubjects(courses);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f1115] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading ScholarSync...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-[#0f1115] text-white">
@@ -69,8 +106,7 @@ export default function App() {
         {/* HOME PAGE */}
         {page === "home" && (
           <HomePage
-            onLogin={handleLogin}
-            onRegister={handleRegister}
+            onLoginSuccess={handleLoginSuccess}
           />
         )}
 
@@ -87,27 +123,24 @@ export default function App() {
         {page === "grades" && (
           <Grades
             subjects={subjects}
-            setSubjects={setSubjects}
+            onSubjectsChange={refreshSubjects}
+            onLogout={handleLogout}
           />
         )}
 
         {/* PROFILE */}
         {page === "profile" && (
-          <Profile user={user} />
+          <Profile />
         )}
 
         {/* CHAT */}
         {page === "chat" && (
-          <Chatbot
-            subjects={subjects}
-            chatHistory={chatHistory}
-            setChatHistory={setChatHistory}
-          />
+          <Chatbot />
         )}
 
         {/* CHAT HISTORY */}
         {page === "history" && (
-          <ChatHistory chatHistory={chatHistory} />
+          <ChatHistory />
         )}
 
       </div>
