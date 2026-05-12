@@ -27,7 +27,7 @@ export default function Sidebar({ setPage, currentPage, onLogout }: { setPage: (
   ];
 
   return (
-    <aside className="w-72 min-h-screen bg-bg-card border-r border-white/5 flex flex-col p-6 sticky top-0">
+    <aside className="w-72 h-screen bg-bg-card border-r border-white/5 flex flex-col p-6 overflow-y-auto custom-scrollbar">
       
       {/* Brand */}
       <div className="flex items-center gap-3 mb-10 px-2">

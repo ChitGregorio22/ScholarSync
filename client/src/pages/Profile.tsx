@@ -285,10 +285,15 @@ export default function Profile() {
               <div className="bg-black/20 p-4 rounded-2xl border border-white/5">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Profile Completion</span>
-                  <span className="text-xs font-bold text-brand-primary">85%</span>
+                  <span className="text-xs font-bold text-brand-primary">
+                    {Math.round(([fullName, studentId, institution, major].filter(Boolean).length / 4) * 100)}%
+                  </span>
                 </div>
                 <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-brand-primary h-full rounded-full" style={{ width: '85%' }} />
+                  <div 
+                    className="bg-brand-primary h-full rounded-full transition-all duration-1000" 
+                    style={{ width: `${Math.round(([fullName, studentId, institution, major].filter(Boolean).length / 4) * 100)}%` }} 
+                  />
                 </div>
               </div>
             </div>

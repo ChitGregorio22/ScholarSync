@@ -186,13 +186,13 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0f1115] text-white">
+    <div className="flex h-screen bg-[#0f1115] text-white overflow-hidden">
 
       {/* SIDEBAR (hidden on home) */}
       {page !== "home" && <Sidebar setPage={setPage} currentPage={page} onLogout={handleLogout} />}
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-4">
+      {/* MAIN CONTENT - Scrollable area */}
+      <main className="flex-1 overflow-y-auto p-4 custom-scrollbar">
 
         {/* HOME PAGE */}
         {page === "home" && (
@@ -206,6 +206,7 @@ export default function App() {
           <Dashboard
             subjects={subjects}
             studyLogs={studyLogs}
+            assessments={assessments}
             user={user}
           />
         )}
@@ -238,7 +239,7 @@ export default function App() {
           <ChatHistory />
         )}
 
-      </div>
+      </main>
     </div>
   );
 }
