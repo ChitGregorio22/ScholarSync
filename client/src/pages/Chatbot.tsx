@@ -166,10 +166,12 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
                   className="bg-transparent text-[10px] text-gray-400 border-none focus:ring-0 p-0 cursor-pointer hover:text-white transition-colors uppercase tracking-widest font-bold"
                 >
                   <option value="gemini-2.5-flash" className="bg-bg-card">Gemini 2.5 Flash</option>
-                  <option value="gemini-2.5-pro" className="bg-bg-card">Gemini 2.5 Pro</option>
-                  <option value="gemma-4-31b-it" className="bg-bg-card">Gemma 4 (31B)</option>
+                  <option value="gemini-2.0-flash" className="bg-bg-card">Gemini 2.0 Flash</option>
                   <option value="gemini-flash-latest" className="bg-bg-card">Latest Flash</option>
                 </select>
+
+
+
               </div>
             </div>
           </div>

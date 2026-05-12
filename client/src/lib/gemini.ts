@@ -1,3 +1,4 @@
+import { getSession } from './supabase-simple';
 import type { Database } from '../types/supabase';
 
 const API_URL = 'http://localhost:5000/api';
@@ -68,14 +69,21 @@ export async function getAIAdvice(
   modelType?: string
 ): Promise<string> {
   try {
+    const session = await getSession();
+    const token = session?.access_token;
+
     const formattedContext = formatStudentContext(studentContext);
     const prompt = `Here is the student's current academic data:\n\n${formattedContext}\n\nStudent's question: ${userMessage}`;
 
     const response = await fetch(`${API_URL}/ai/advice`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({ prompt, history: chatHistory, modelType })
     });
+
 
     const data = await response.json();
     if (!response.ok) throw data;

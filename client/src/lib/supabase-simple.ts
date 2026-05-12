@@ -106,7 +106,11 @@ async function getAuthToken() {
   return session?.access_token;
 }
 
-async function proxyFetch(endpoint: string, options: any = {}) {
+interface FetchOptions extends RequestInit {
+  headers?: Record<string, string>;
+}
+
+async function proxyFetch<T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const token = await getAuthToken();
   const headers = {
     'Content-Type': 'application/json',
@@ -128,9 +132,9 @@ async function proxyFetch(endpoint: string, options: any = {}) {
 // COURSES CRUD (Using Local Backend)
 // ============================================
 
-export async function getCourses() {
+export async function getCourses(): Promise<Course[]> {
   try {
-    const data = await proxyFetch('/courses');
+    const data = await proxyFetch<Course[]>('/courses');
     localStorage.setItem('ss_cached_courses', JSON.stringify(data));
     return data;
   } catch (error) {
@@ -139,98 +143,97 @@ export async function getCourses() {
   }
 }
 
-export async function createCourse(course: any) {
-  return proxyFetch('/courses', {
+export async function createCourse(course: Partial<Course>): Promise<Course> {
+  return proxyFetch<Course>('/courses', {
     method: 'POST',
     body: JSON.stringify(course)
   });
 }
 
-export async function updateCourse(id: string, updates: any) {
-  // We can add PATCH to server if needed, or use POST for now
-  // For simplicity, let's just use the server's existing endpoints
-  return proxyFetch(`/courses/${id}`, {
+export async function updateCourse(id: string, updates: Partial<Course>): Promise<Course> {
+  return proxyFetch<Course>(`/courses/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updates)
   });
 }
 
-export async function deleteCourse(id: string) {
-  return proxyFetch(`/courses/${id}`, { method: 'DELETE' });
+export async function deleteCourse(id: string): Promise<{ status: string }> {
+  return proxyFetch<{ status: string }>(`/courses/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
 // ASSESSMENTS CRUD (Using Local Backend)
 // ============================================
 
-export async function getAssessments(courseId: string) {
-  return proxyFetch(`/assessments/${courseId}`);
+export async function getAssessments(courseId: string): Promise<any[]> {
+  return proxyFetch<any[]>(`/assessments/${courseId}`);
 }
 
-export async function createAssessment(assessment: any) {
-  return proxyFetch('/assessments', {
+export async function createAssessment(assessment: any): Promise<any> {
+  return proxyFetch<any>('/assessments', {
     method: 'POST',
     body: JSON.stringify(assessment)
   });
 }
 
-export async function updateAssessment(id: string, updates: any) {
-  return proxyFetch(`/assessments/${id}`, {
+export async function updateAssessment(id: string, updates: any): Promise<any> {
+  return proxyFetch<any>(`/assessments/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updates)
   });
 }
 
-export async function deleteAssessment(id: string) {
-  return proxyFetch(`/assessments/${id}`, { method: 'DELETE' });
+export async function deleteAssessment(id: string): Promise<{ status: string }> {
+  return proxyFetch<{ status: string }>(`/assessments/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
 // STUDY LOGS CRUD (Using Local Backend)
 // ============================================
 
-export async function getStudyLogs(courseId?: string) {
+export async function getStudyLogs(courseId?: string): Promise<StudyLog[]> {
   const url = courseId ? `/study-logs?courseId=${courseId}` : '/study-logs';
-  return proxyFetch(url);
+  return proxyFetch<StudyLog[]>(url);
 }
 
-export async function createStudyLog(log: any) {
-  return proxyFetch('/study-logs', {
+export async function createStudyLog(log: Partial<StudyLog>): Promise<StudyLog> {
+  return proxyFetch<StudyLog>('/study-logs', {
     method: 'POST',
     body: JSON.stringify(log)
   });
 }
 
-export async function deleteStudyLog(id: string) {
-  return proxyFetch(`/study-logs/${id}`, { method: 'DELETE' });
+export async function deleteStudyLog(id: string): Promise<{ status: string }> {
+  return proxyFetch<{ status: string }>(`/study-logs/${id}`, { method: 'DELETE' });
 }
 
 // ============================================
 // PROFILE & CHAT (Using Local Backend)
 // ============================================
 
-export async function getProfile() {
-  return proxyFetch('/profile');
+export async function getProfile(): Promise<any> {
+  return proxyFetch<any>('/profile');
 }
 
-export async function updateProfile(updates: any) {
-  return proxyFetch('/profile', {
+export async function updateProfile(updates: any): Promise<any> {
+  return proxyFetch<any>('/profile', {
     method: 'PATCH',
     body: JSON.stringify(updates)
   });
 }
 
-export async function getChatHistory() {
-  return proxyFetch('/chat/history');
+export async function getChatHistory(): Promise<ChatMessage[]> {
+  return proxyFetch<ChatMessage[]>('/chat/history');
 }
 
-export async function saveChatMessage(message: any) {
-  return proxyFetch('/chat', {
+export async function saveChatMessage(message: { role: string; content: string; context?: any }): Promise<ChatMessage> {
+  return proxyFetch<ChatMessage>('/chat', {
     method: 'POST',
     body: JSON.stringify(message)
   });
 }
 
-export async function getStudentDataForAI() {
-  return proxyFetch('/ai/student-data');
+export async function getStudentDataForAI(): Promise<any> {
+  return proxyFetch<any>('/ai/student-data');
 }
+
