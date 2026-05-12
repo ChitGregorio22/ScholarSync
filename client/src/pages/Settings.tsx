@@ -23,7 +23,8 @@ import {
   ChevronDown,
   Book,
   Send,
-  Ticket
+  Ticket,
+  Award
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createTicket } from "../lib/supabase-simple";

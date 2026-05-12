@@ -7,6 +7,7 @@ export interface Course {
   course_code?: string;
   credits?: number;
   target_grade?: string;
+  grade?: string;
   description?: string;
   created_at?: string;
 }

@@ -20,8 +20,7 @@ import {
   XAxis, 
   YAxis, 
   Tooltip, 
-  CartesianGrid,
-  Cell
+  CartesianGrid
 } from "recharts";
 import { useLanguage } from "../lib/LanguageContext";
 
@@ -192,13 +191,11 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
           <div className="flex-1 w-full min-h-[300px]">
             {subjects.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={subjects.map(s => {
-                  const data = {
-                    ...s,
-                    displayGrade: getNumericGrade(s.grade || s.target_grade)
-                  };
-                  return data;
-                })}>
+                <BarChart data={subjects.map(s => ({
+                  ...s,
+                  current: getNumericGrade(s.grade),
+                  target: getNumericGrade(s.target_grade)
+                }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                   <XAxis 
                     dataKey="course_name" 
@@ -222,17 +219,22 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                       borderRadius: '12px',
                       color: 'var(--text-primary)'
                     }}
-                    itemStyle={{ color: '#6366f1' }}
                   />
                   <Bar 
-                    dataKey="displayGrade" 
-                    radius={[6, 6, 0, 0]}
-                    barSize={40}
-                  >
-                    {subjects.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#a855f7'} fillOpacity={0.8} />
-                    ))}
-                  </Bar>
+                    name="Current"
+                    dataKey="current" 
+                    fill="#6366f1"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                  <Bar 
+                    name="Target"
+                    dataKey="target" 
+                    fill="#ffffff10"
+                    stroke="#ffffff20"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

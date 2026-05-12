@@ -1,6 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabase-simple';
 import type { Database } from '../types/supabase';
-
 export type { Database };
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -10,7 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export { supabase };
 
 // ============================================
 // AUTH HELPERS

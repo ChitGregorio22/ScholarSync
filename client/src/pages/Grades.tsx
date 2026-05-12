@@ -6,8 +6,6 @@ import {
   getStudyLogs, 
   createStudyLog,
   deleteStudyLog,
-  getProfile,
-  updateProfile,
   type Course,
   type StudyLog
 } from "../lib/supabase-simple";
@@ -15,14 +13,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
   Trash2, 
-  User, 
   BookOpen, 
   Clock, 
-  Save, 
   Calendar,
-  CheckCircle2,
   GraduationCap,
-  Sparkles,
   BarChart3,
   FileText
 } from "lucide-react";
@@ -30,7 +24,6 @@ import { useLanguage } from "../lib/LanguageContext";
 
 interface GradesProps {
   onSubjectsChange: () => void;
-  onLogout: () => void;
 }
 
 /**
@@ -39,7 +32,7 @@ interface GradesProps {
  * Comprehensive academic management page including profile, course CRUD, 
  * and study log tracking. Features a premium design with animated interactions.
  */
-export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
+export default function Grades({ onSubjectsChange }: GradesProps) {
   const { t } = useLanguage();
   const [courses, setCourses] = useState<Course[]>([]);
   const [studyLogs, setStudyLogs] = useState<StudyLog[]>([]);
@@ -52,17 +45,12 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
   const [courseCode, setCourseCode] = useState("");
   const [credits, setCredits] = useState("");
   const [targetGrade, setTargetGrade] = useState("");
+  const [currentGrade, setCurrentGrade] = useState("");
 
   const [studyCourseId, setStudyCourseId] = useState("");
   const [studyHours, setStudyHours] = useState("");
   const [studyDate, setStudyDate] = useState(new Date().toISOString().split('T')[0]);
   const [studyNotes, setStudyNotes] = useState("");
-
-  // Profile states
-  const [fullName, setFullName] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [institution, setInstitution] = useState("");
-  const [major, setMajor] = useState("");
 
   useEffect(() => {
     loadData();
@@ -71,42 +59,17 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [coursesData, logsData, profileData] = await Promise.all([
+      const [coursesData, logsData] = await Promise.all([
         getCourses(),
-        getStudyLogs(),
-        getProfile().catch(() => null)
+        getStudyLogs()
       ]);
       
       setCourses(coursesData);
       setStudyLogs(logsData);
-      
-      if (profileData) {
-        setFullName(profileData.full_name || "");
-        setStudentId(profileData.student_id || "");
-        setInstitution(profileData.institution || "");
-        setMajor(profileData.major || "");
-      }
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setSaving(true);
-    try {
-      await updateProfile({
-        full_name: fullName,
-        student_id: studentId,
-        institution,
-        major
-      });
-      // Success visual feedback could go here
-    } catch (error: any) {
-      console.error("Error saving profile:", error);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -118,12 +81,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
         course_name: courseName,
         course_code: courseCode || undefined,
         credits: credits ? parseInt(credits) : undefined,
-        target_grade: targetGrade || undefined
+        target_grade: targetGrade || undefined,
+        grade: currentGrade || undefined
       });
       setCourseName("");
       setCourseCode("");
       setCredits("");
       setTargetGrade("");
+      setCurrentGrade("");
       await loadData();
       onSubjectsChange();
     } catch (error: any) {
@@ -277,6 +242,12 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
                   placeholder="Target Grade"
                   className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
+                <input
+                  value={currentGrade}
+                  onChange={(e) => setCurrentGrade(e.target.value)}
+                  placeholder="Current Grade"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
+                />
               </div>
               <div className="mt-4 flex justify-end">
                 <button
@@ -319,17 +290,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Target</span>
-                        <span className="text-lg font-extrabold text-brand-primary">{course.target_grade || "N/A"}</span>
+                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Current</span>
+                        <span className="text-lg font-extrabold text-tx-main">{course.grade || "N/A"}</span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Status</span>
-                        <span className="text-xs font-bold flex items-center gap-1 text-green-400">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Active
-                        </span>
+                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Target</span>
+                        <span className="text-lg font-extrabold text-brand-primary">{course.target_grade || "N/A"}</span>
                       </div>
                     </div>
                   </motion.div>
