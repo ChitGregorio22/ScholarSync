@@ -142,10 +142,10 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
   };
 
   return (
-    <div className={`flex flex-col bg-bg-dark text-white rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl border border-white/5 ${isFullscreen ? 'fixed inset-4 z-[100]' : 'h-[calc(100vh-2rem)]'}`}>
+    <div className={`flex flex-col bg-bg-dark text-tx-main rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl border border-border-subtle ${isFullscreen ? 'fixed inset-4 z-[100]' : 'h-[calc(100vh-2rem)]'}`}>
 
       {/* HEADER */}
-      <header className="p-5 flex justify-between items-center bg-bg-card border-b border-white/5 backdrop-blur-md bg-opacity-80">
+      <header className="p-5 flex justify-between items-center bg-bg-card border-b border-border-subtle backdrop-blur-md bg-opacity-80">
         <div className="flex items-center gap-4">
           {onBack && (
             <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-xl transition">
@@ -163,11 +163,11 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="bg-transparent text-[10px] text-gray-400 border-none focus:ring-0 p-0 cursor-pointer hover:text-white transition-colors uppercase tracking-widest font-bold"
+                  className="bg-transparent text-[10px] text-tx-dim border-none focus:ring-0 p-0 cursor-pointer hover:text-tx-main transition-colors uppercase tracking-widest font-bold"
                 >
-                  <option value="gemini-2.5-flash" className="bg-bg-card">Gemini 2.5 Flash</option>
-                  <option value="gemini-2.0-flash" className="bg-bg-card">Gemini 2.0 Flash</option>
-                  <option value="gemini-flash-latest" className="bg-bg-card">Latest Flash</option>
+                  <option value="gemini-2.5-flash" className="bg-bg-card text-tx-main">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.0-flash" className="bg-bg-card text-tx-main">Gemini 2.0 Flash</option>
+                  <option value="gemini-flash-latest" className="bg-bg-card text-tx-main">Latest Flash</option>
                 </select>
 
 
@@ -213,11 +213,11 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
               <div className={`relative group max-w-[80%] md:max-w-[70%] ${msg.sender === "user" ? "order-1" : "order-2"}`}>
                 <div className={`px-5 py-4 rounded-3xl shadow-sm text-sm leading-relaxed ${msg.sender === "user"
                   ? "bg-brand-primary text-white rounded-br-none"
-                  : "bg-white/5 border border-white/5 text-gray-200 rounded-bl-none"
+                  : "bg-bg-hover border border-border-subtle text-tx-main rounded-bl-none shadow-inner"
                   }`}>
                   {msg.text}
                 </div>
-                <span className={`text-[10px] text-gray-600 font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
+                <span className={`text-[10px] text-tx-muted font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -285,7 +285,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
             onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
             placeholder="Ask anything about your academic progress..."
             disabled={loading}
-            className="w-full bg-bg-dark border border-white/5 pl-6 pr-16 py-4 rounded-2xl focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50 shadow-inner"
+            className="w-full bg-bg-dark border border-border-subtle pl-6 pr-16 py-4 rounded-2xl focus:outline-none focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted disabled:opacity-50 shadow-inner"
           />
           <button
             onClick={() => sendMessage()}

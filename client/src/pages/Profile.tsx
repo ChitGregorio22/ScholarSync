@@ -130,8 +130,8 @@ export default function Profile() {
           <User className="w-5 h-5 text-brand-primary" />
           <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">Student Portal</span>
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-white">Student Profile</h1>
-        <p className="text-gray-400 mt-2">Personalize your academic identity and track daily attendance.</p>
+        <h1 className="text-4xl font-extrabold tracking-tight">Student Profile</h1>
+        <p className="text-tx-dim mt-2">Personalize your academic identity and track daily attendance.</p>
       </header>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -149,8 +149,8 @@ export default function Profile() {
                   <User className="w-8 h-8 text-brand-primary" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Personal Information</h3>
-                  <p className="text-gray-500 text-sm">Update your public student details</p>
+                  <h3 className="text-2xl font-bold">Personal Information</h3>
+                  <p className="text-tx-dim text-sm">Update your public student details</p>
                 </div>
               </div>
               <button
@@ -167,13 +167,13 @@ export default function Profile() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-gray-500 ml-1">
                   <User className="w-3.5 h-3.5" />
-                  <label className="text-[10px] font-bold uppercase tracking-widest">Full Name</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Full Name</label>
                 </div>
                 <input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. John Smith"
-                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-white placeholder:text-gray-700"
+                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted"
                 />
               </div>
 
@@ -186,7 +186,7 @@ export default function Profile() {
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
                   placeholder="e.g. 2024-5582"
-                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-white placeholder:text-gray-700"
+                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted"
                 />
               </div>
 
@@ -199,7 +199,7 @@ export default function Profile() {
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
                   placeholder="e.g. Harvard University"
-                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-white placeholder:text-gray-700"
+                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted"
                 />
               </div>
 
@@ -212,7 +212,7 @@ export default function Profile() {
                   value={major}
                   onChange={(e) => setMajor(e.target.value)}
                   placeholder="e.g. Computer Science"
-                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-white placeholder:text-gray-700"
+                  className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted"
                 />
               </div>
             </div>
@@ -226,8 +226,8 @@ export default function Profile() {
                   <CalendarIcon className="w-8 h-8 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Attendance Calendar</h3>
-                  <p className="text-gray-500 text-sm">{new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(today)}</p>
+                  <h3 className="text-2xl font-bold">Attendance Calendar</h3>
+                  <p className="text-tx-dim text-sm">{new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(today)}</p>
                 </div>
               </div>
               <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest">

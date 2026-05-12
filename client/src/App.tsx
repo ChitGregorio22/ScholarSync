@@ -186,7 +186,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-[#0f1115] text-white overflow-hidden">
+    <div className="flex h-screen bg-bg-dark text-tx-main overflow-hidden transition-colors duration-300">
 
       {/* SIDEBAR (hidden on home) */}
       {page !== "home" && <Sidebar setPage={setPage} currentPage={page} onLogout={handleLogout} />}

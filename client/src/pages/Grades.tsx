@@ -208,10 +208,10 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
             <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">Academic Management</span>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight">Grades & Records</h1>
-          <p className="text-gray-400 mt-2">Manage your academic profile and track study progress.</p>
+          <p className="text-tx-dim mt-2">Manage your academic profile and track study progress.</p>
         </div>
 
-        <div className="flex bg-bg-card p-1.5 rounded-2xl border border-white/5 shadow-inner">
+        <div className="flex bg-bg-card p-1.5 rounded-2xl border border-border-subtle shadow-inner">
           {[
             { id: "courses", label: "Courses", icon: BookOpen },
             { id: "logs", label: "Study Logs", icon: Clock },
@@ -222,7 +222,7 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold ${
                 activeTab === tab.id 
                   ? "bg-brand-primary text-white shadow-lg" 
-                  : "text-gray-500 hover:text-white"
+                  : "text-tx-dim hover:text-tx-main hover:bg-bg-hover"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -254,33 +254,33 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
                   value={courseName}
                   onChange={(e) => setCourseName(e.target.value)}
                   placeholder="Course Name"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   value={courseCode}
                   onChange={(e) => setCourseCode(e.target.value)}
                   placeholder="Code (e.g. CS101)"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   type="number"
                   value={credits}
                   onChange={(e) => setCredits(e.target.value)}
                   placeholder="Credits"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   value={targetGrade}
                   onChange={(e) => setTargetGrade(e.target.value)}
                   placeholder="Target Grade"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
               </div>
               <div className="mt-4 flex justify-end">
                 <button
                   onClick={addCourse}
                   disabled={saving || !courseName}
-                  className="bg-white text-black px-8 py-2.5 rounded-xl font-bold hover:bg-gray-200 transition active:scale-95 disabled:opacity-50"
+                  className="bg-brand-primary text-white px-8 py-2.5 rounded-xl font-bold hover:bg-brand-primary/90 transition active:scale-95 disabled:opacity-50 shadow-lg shadow-brand-primary/20"
                 >
                   Create Course
                 </button>

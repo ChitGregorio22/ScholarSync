@@ -90,8 +90,8 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Academic Overview</h1>
-          <p className="text-gray-400 mt-1">Hello, {user?.user_metadata?.full_name || "Student"}. Here's your progress.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-tx-main">Academic Overview</h1>
+          <p className="text-tx-dim mt-1">Hello, {user?.user_metadata?.full_name || "Student"}. Here's your progress.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="glass-card px-4 py-2 flex items-center gap-2">
@@ -141,7 +141,7 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-lg font-bold">Performance Analytics</h3>
-              <p className="text-sm text-gray-500">Grade distribution across subjects</p>
+              <p className="text-sm text-tx-dim">Grade distribution across subjects</p>
             </div>
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('switchPage', { detail: 'grades' }))}
@@ -180,10 +180,10 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                   <Tooltip 
                     cursor={{ fill: '#ffffff05' }}
                     contentStyle={{ 
-                      backgroundColor: '#161a22', 
-                      border: '1px solid #ffffff10',
+                      backgroundColor: 'var(--bg-card)', 
+                      border: '1px solid var(--border-color)',
                       borderRadius: '12px',
-                      color: '#fff'
+                      color: 'var(--text-primary)'
                     }}
                     itemStyle={{ color: '#6366f1' }}
                   />
@@ -378,9 +378,9 @@ function StatCard({ title, value, subtitle, icon: Icon, color, trend }: any) {
       </div>
       
       <div>
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</p>
+        <p className="text-xs font-medium text-tx-muted uppercase tracking-wider">{title}</p>
         <h4 className="text-2xl font-bold mt-1 tracking-tight">{value}</h4>
-        <p className="text-xs text-gray-400 mt-1 truncate">{subtitle}</p>
+        <p className="text-xs text-tx-dim mt-1 truncate">{subtitle}</p>
       </div>
     </motion.div>
   );
