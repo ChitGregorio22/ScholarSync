@@ -43,18 +43,20 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
   }, []);
   
   // Smart Auto-Detection for grading scale
-  const detectedScale = subjects.length > 0 && 
-    subjects.some(s => {
-      const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
-      return !isNaN(v) && v > 0 && v <= 5.0;
-    }) && !subjects.some(s => {
-      const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
-      return v > 5.0;
-    }) ? 'college' : 'percentage';
+  const hasGpaValues = subjects.some(s => {
+    const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+    return !isNaN(v) && v > 0 && v <= 5.0;
+  });
+  const hasPercentageValues = subjects.some(s => {
+    const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+    return v > 5.0;
+  });
 
-  // Prioritize auto-detected 'college' scale if we see GPA-style values
+  const detectedScale = (hasGpaValues && !hasPercentageValues) ? 'college' : 'percentage';
+
+  // Force percentage if we see any large numbers, otherwise respect auto-detection or saved preference
   const savedScale = localStorage.getItem('ss_grading_scale');
-  const gradingScale = (detectedScale === 'college') ? 'college' : (savedScale || 'percentage');
+  const gradingScale = hasPercentageValues ? 'percentage' : (detectedScale === 'college' ? 'college' : (savedScale || 'percentage'));
   
   // Helper to convert grades/targets to numbers for chart
   const getNumericGrade = (val: any) => {
