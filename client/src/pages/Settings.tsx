@@ -16,7 +16,10 @@ import {
   FileText,
   LifeBuoy,
   Type,
-  Zap
+  Zap,
+  Mail,
+  MessageSquare,
+  Clock as ClockIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "../lib/LanguageContext";
@@ -34,7 +37,24 @@ export default function Settings() {
   const [isDyslexicFont, setIsDyslexicFont] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showAccessibility, setShowAccessibility] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string, type: 'info' | 'success' } | null>(null);
+
+  // Notification Preferences State
+  const [notifPrefs, setNotifPrefs] = useState(() => {
+    const saved = localStorage.getItem('ss_notif_prefs');
+    return saved ? JSON.parse(saved) : {
+      email: true,
+      push: true,
+      aiAdvisor: true,
+      reminders: false
+    };
+  });
+
+  // Save notif prefs to local storage
+  useEffect(() => {
+    localStorage.setItem('ss_notif_prefs', JSON.stringify(notifPrefs));
+  }, [notifPrefs]);
 
   // Initialize from document classes
   useEffect(() => {
@@ -88,12 +108,17 @@ export default function Settings() {
     } else if (id === "help") {
       setShowHelp(true);
     } else if (id === "notifications") {
-      setStatusMessage({ text: "Notification preferences updated", type: 'success' });
+      setShowNotifications(true);
     } else if (id === "privacy") {
       setStatusMessage({ text: "Security settings verified", type: 'success' });
     } else {
       setStatusMessage({ text: `Setting updated`, type: 'info' });
     }
+  };
+
+  const toggleNotif = (key: keyof typeof notifPrefs) => {
+    setNotifPrefs(prev => ({ ...prev, [key]: !prev[key] }));
+    setStatusMessage({ text: "Preference updated", type: 'success' });
   };
 
   const sections = [
@@ -146,6 +171,76 @@ export default function Settings() {
             {statusMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <Info className="w-5 h-5" />}
             <span className="font-bold text-sm">{statusMessage.text}</span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Notifications Modal */}
+      <AnimatePresence>
+        {showNotifications && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowNotifications(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="glass-card w-full max-w-md p-8 relative z-10 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="bg-brand-primary/20 p-2 rounded-lg">
+                    <Bell className="w-6 h-6 text-brand-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-tx-main">Notifications</h2>
+                </div>
+                <button onClick={() => setShowNotifications(false)} className="p-2 hover:bg-bg-hover rounded-full transition">
+                  <X className="w-5 h-5 text-tx-dim" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  { id: 'email', label: 'Email Alerts', icon: Mail, desc: 'Weekly progress reports & reminders', comingSoon: true },
+                  { id: 'push', label: 'Push Notifications', icon: Zap, desc: 'Real-time course updates' },
+                  { id: 'aiAdvisor', label: 'AI Study Advice', icon: MessageSquare, desc: 'Smart tips from your Advisor' },
+                  { id: 'reminders', label: 'Inactivity Reminders', icon: ClockIcon, desc: 'Nudges when you fall behind' }
+                ].map((item) => (
+                  <button 
+                    key={item.id}
+                    onClick={() => !item.comingSoon && toggleNotif(item.id as any)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                      (notifPrefs as any)[item.id] ? 'bg-brand-primary/10 border-brand-primary' : 'bg-bg-hover border-border-subtle'
+                    } ${item.comingSoon ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="p-2 bg-white/5 rounded-lg">
+                        <item.icon className={`w-5 h-5 ${(notifPrefs as any)[item.id] ? 'text-brand-primary' : 'text-tx-dim'}`} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-tx-main">{item.label}</p>
+                          {item.comingSoon && (
+                            <span className="text-[8px] font-bold bg-brand-primary/20 text-brand-primary px-1.5 py-0.5 rounded uppercase">Next Version</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-tx-dim">{item.desc}</p>
+                      </div>
+                    </div>
+                    {!item.comingSoon && (
+                      <div className={`w-10 h-5 rounded-full relative transition-colors ${(notifPrefs as any)[item.id] ? 'bg-brand-primary' : 'bg-gray-700'}`}>
+                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${(notifPrefs as any)[item.id] ? 'right-1' : 'left-1'}`} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

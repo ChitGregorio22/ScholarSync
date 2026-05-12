@@ -28,6 +28,19 @@ type Subject = any;
 
 export default function Dashboard({ subjects = [], studyLogs = [], assessments = [], user }: { subjects: Subject[], studyLogs: any[], assessments: any[], user: any }) {
   const { t } = useLanguage();
+  const [showAiInsights, setShowAiInsights] = useState(true);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('ss_notif_prefs');
+    if (saved) {
+      try {
+        const prefs = JSON.parse(saved);
+        setShowAiInsights(prefs.aiAdvisor !== false);
+      } catch (e) {
+        console.error("Failed to parse prefs", e);
+      }
+    }
+  }, []);
   
   // Helper to convert grades/targets to numbers for chart
   const getNumericGrade = (val: any) => {
@@ -217,7 +230,12 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
           </div>
 
           <div className="space-y-6 flex-1">
-            {subjects.length === 0 ? (
+            {!showAiInsights ? (
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-3 opacity-50">
+                <BrainCircuit className="w-10 h-10" />
+                <p className="text-sm">AI Advice is currently disabled in your Settings.</p>
+              </div>
+            ) : subjects.length === 0 ? (
               <p className="text-gray-500 text-sm leading-relaxed">
                 {t('start_adding_grades')}
               </p>
