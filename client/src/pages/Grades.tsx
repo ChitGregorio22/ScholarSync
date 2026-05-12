@@ -26,6 +26,7 @@ import {
   BarChart3,
   FileText
 } from "lucide-react";
+import { useLanguage } from "../lib/LanguageContext";
 
 interface GradesProps {
   onSubjectsChange: () => void;
@@ -39,6 +40,7 @@ interface GradesProps {
  * and study log tracking. Features a premium design with animated interactions.
  */
 export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
+  const { t } = useLanguage();
   const [courses, setCourses] = useState<Course[]>([]);
   const [studyLogs, setStudyLogs] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,14 +209,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
             <GraduationCap className="w-5 h-5 text-brand-primary" />
             <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">Academic Management</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight">Grades & Records</h1>
-          <p className="text-tx-dim mt-2">Manage your academic profile and track study progress.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight">{t('grades_manager')}</h1>
+          <p className="text-tx-dim mt-2">{t('manage_academic_records')}</p>
         </div>
 
         <div className="flex bg-bg-card p-1.5 rounded-2xl border border-border-subtle shadow-inner">
           {[
-            { id: "courses", label: "Courses", icon: BookOpen },
-            { id: "logs", label: "Study Logs", icon: Clock },
+            { id: "courses", label: t('courses'), icon: BookOpen },
+            { id: "logs", label: t('study_logs'), icon: Clock },
           ].map((tab) => (
             <button
               key={tab.id}

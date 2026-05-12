@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LanguageProvider } from "./lib/LanguageContext";
 
 import HomePage from "./pages/HomePage";
 import Sidebar from "./components/Sidebar";
@@ -186,7 +187,8 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-bg-dark text-tx-main overflow-hidden transition-colors duration-300">
+    <LanguageProvider>
+      <div className="flex h-screen bg-bg-dark text-tx-main overflow-hidden transition-colors duration-300">
 
       {/* SIDEBAR (hidden on home) */}
       {page !== "home" && <Sidebar setPage={setPage} currentPage={page} onLogout={handleLogout} />}
@@ -241,5 +243,6 @@ export default function App() {
 
       </main>
     </div>
+    </LanguageProvider>
   );
 }

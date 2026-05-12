@@ -19,12 +19,20 @@ type AttendanceDay = {
   status: "present" | "absent";
 };
 
+type ProfileData = {
+  full_name: string;
+  student_id: string;
+  institution: string;
+  major: string;
+};
+
 /**
  * Consolidated Profile Page
  * 
  * Manages student personal information (Supabase) and attendance tracking.
  */
 export default function Profile() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -130,8 +138,8 @@ export default function Profile() {
           <User className="w-5 h-5 text-brand-primary" />
           <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">Student Portal</span>
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight">Student Profile</h1>
-        <p className="text-tx-dim mt-2">Personalize your academic identity and track daily attendance.</p>
+        <h1 className="text-4xl font-extrabold tracking-tight">{t('student_profile')}</h1>
+        <p className="text-tx-dim mt-2">{t('manage_personal_info')}</p>
       </header>
 
       <div className="grid lg:grid-cols-3 gap-8">

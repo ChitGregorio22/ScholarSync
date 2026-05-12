@@ -25,15 +25,16 @@ interface Message {
 }
 
 /**
- * Chatbot Component
+ * AI Student Performance Advisor
  * 
- * Premium AI Advisor chat interface with animations and context-aware insights.
+ * Chat interface with animations and context-aware insights.
  * Integrates with Google Gemini API for personalized academic advice.
  * 
  * @param {Object} props
  * @param {Function} props.onBack - Optional callback to go back
  */
-export default function Chatbot({ onBack }: { onBack?: () => void }) {
+export default function Chatbot({ onBack, isFullscreen: initialFullscreen = false }: { onBack?: () => void, isFullscreen?: boolean }) {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -44,7 +45,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(initialFullscreen);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -157,9 +158,10 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
               <Bot className="w-6 h-6 text-brand-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold tracking-tight">AI Academic Advisor</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+              <h2 className="text-xl font-bold tracking-tight text-tx-main">{t('ai_advisor')}</h2>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[10px] font-bold text-green-500/80 uppercase tracking-widest">Active Insight</p>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
@@ -283,7 +285,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
-            placeholder="Ask anything about your academic progress..."
+            placeholder={t('ask_anything')}
             disabled={loading}
             className="w-full bg-bg-dark border border-border-subtle pl-6 pr-16 py-4 rounded-2xl focus:outline-none focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted disabled:opacity-50 shadow-inner"
           />
