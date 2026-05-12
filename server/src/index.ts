@@ -8,6 +8,7 @@ import studyLogRoutes from './routes/study-logs';
 import profileRoutes from './routes/profile';
 import chatRoutes from './routes/chat';
 import aiRoutes from './routes/ai';
+import supportRoutes from './routes/support';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/study-logs', studyLogRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/support', supportRoutes);
 
 app.listen(port, () => {
   console.log(`[ScholarSync] Server running at http://localhost:${port}`);

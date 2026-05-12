@@ -13,15 +13,20 @@ import {
   CheckCircle2,
   Info,
   X,
-  FileText,
   LifeBuoy,
   Type,
   Zap,
   Mail,
   MessageSquare,
-  Clock as ClockIcon
+  Clock as ClockIcon,
+  Calendar as CalendarIcon,
+  ChevronDown,
+  Book,
+  Send,
+  Ticket
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { createTicket } from "../lib/supabase-simple";
 import { useLanguage } from "../lib/LanguageContext";
 import type { Language as LangType } from "../lib/translations";
 
@@ -38,7 +43,16 @@ export default function Settings() {
   const [showHelp, setShowHelp] = useState(false);
   const [showAccessibility, setShowAccessibility] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [activeGuide, setActiveGuide] = useState<number | null>(null);
+  const [ticketStatus, setTicketStatus] = useState<{ id: string, status: string } | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string, type: 'info' | 'success' } | null>(null);
+
+  // Support Form State
+  const [supportForm, setSupportForm] = useState({
+    subject: "Technical Issue",
+    message: ""
+  });
+  const [isSendingTicket, setIsSendingTicket] = useState(false);
 
   // Notification Preferences State
   const [notifPrefs, setNotifPrefs] = useState(() => {
@@ -120,6 +134,50 @@ export default function Settings() {
     setNotifPrefs(prev => ({ ...prev, [key]: !prev[key] }));
     setStatusMessage({ text: "Preference updated", type: 'success' });
   };
+
+  const handleContactSupport = async () => {
+    if (!supportForm.message.trim()) {
+      setStatusMessage({ text: "Please enter a message", type: 'info' });
+      return;
+    }
+
+    setIsSendingTicket(true);
+    try {
+      const newId = Math.floor(1000 + Math.random() * 9000).toString();
+      await createTicket(newId, supportForm.subject, supportForm.message);
+      setTicketStatus({ id: newId, status: "Pending" });
+      setStatusMessage({ text: `Support ticket #${newId} created!`, type: 'success' });
+      setSupportForm({ subject: "Technical Issue", message: "" }); // Reset form
+    } catch (err) {
+      console.error("Failed to create ticket:", err);
+      setStatusMessage({ text: "Error creating ticket. Please try again.", type: 'info' });
+    } finally {
+      setIsSendingTicket(false);
+    }
+  };
+
+  const guides = [
+    {
+      title: "Getting Started with ScholarSync",
+      icon: Book,
+      content: "ScholarSync helps you track your academic performance using AI. Start by adding your current courses in the Grades Manager, then log your study sessions to see your productivity analytics grow."
+    },
+    {
+      title: "How to use the AI Advisor",
+      icon: MessageSquare,
+      content: "The AI Advisor analyzes your grades and study logs to give personalized advice. Click 'Consult Advisor' on your dashboard to ask specific questions like 'How can I improve my GPA?' or 'What subjects need more focus?'"
+    },
+    {
+      title: "Managing Attendance",
+      icon: CalendarIcon,
+      content: "In your Profile tab, you'll find the Attendance Calendar. Simply click on a date to toggle between 'Present' (Green) and 'Absent' (Red). This helps you track your consistency over the semester."
+    },
+    {
+      title: "Account & Data Security",
+      icon: Shield,
+      content: "Your data is securely stored using Supabase. We only track the academic information you provide. You can manage your personal details anytime in the Profile section."
+    }
+  ];
 
   const sections = [
     {
@@ -322,56 +380,171 @@ export default function Settings() {
       {/* Help Modal */}
       <AnimatePresence>
         {showHelp && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-hidden">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowHelp(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
             />
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="glass-card w-full max-w-lg p-8 relative z-10 overflow-hidden"
+              exit={{ scale: 0.95, opacity: 0, y: 30 }}
+              className="bg-bg-dark/95 border border-white/10 w-full max-w-2xl p-0 relative z-10 overflow-hidden flex flex-col max-h-[85vh] rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]"
             >
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="bg-brand-primary/20 p-2 rounded-lg">
-                    <LifeBuoy className="w-6 h-6 text-brand-primary" />
+              {/* Header */}
+              <div className="p-8 border-b border-white/5 bg-white/[0.02] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className="bg-brand-primary p-3 rounded-2xl shadow-lg shadow-brand-primary/20">
+                    <LifeBuoy className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-tx-main">Help Center</h2>
+                  <div>
+                    <h2 className="text-2xl font-bold text-tx-main">Help Center</h2>
+                    <p className="text-xs text-tx-dim">Support guides and direct assistance</p>
+                  </div>
                 </div>
-                <button onClick={() => setShowHelp(false)} className="p-2 hover:bg-bg-hover rounded-full transition">
-                  <X className="w-5 h-5 text-tx-dim" />
+                <button onClick={() => setShowHelp(false)} className="p-3 hover:bg-white/5 rounded-2xl transition-colors active:scale-95">
+                  <X className="w-6 h-6 text-tx-dim" />
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-bg-hover border border-border-subtle hover:border-brand-primary/30 transition-all group cursor-pointer">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FileText className="w-5 h-5 text-brand-primary" />
-                    <h4 className="font-bold text-tx-main">Getting Started Guide</h4>
+              {/* Content Area */}
+              <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                {/* Guides Section */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-1 h-4 bg-brand-primary rounded-full" />
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-tx-dim">Quick Guides</h3>
                   </div>
-                  <p className="text-sm text-tx-dim">Learn the basics of tracking your academic progress with ScholarSync.</p>
-                </div>
-                
-                <div className="p-4 rounded-2xl bg-bg-hover border border-border-subtle hover:border-brand-primary/30 transition-all group cursor-pointer">
-                  <div className="flex items-center gap-3 mb-2">
-                    <SettingsIcon className="w-5 h-5 text-brand-primary" />
-                    <h4 className="font-bold text-tx-main">Account Recovery</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {guides.map((guide, idx) => (
+                      <button 
+                        key={idx}
+                        onClick={() => setActiveGuide(activeGuide === idx ? null : idx)}
+                        className={`group p-5 rounded-2xl border text-left transition-all ${
+                          activeGuide === idx 
+                            ? 'bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/5' 
+                            : 'bg-white/[0.03] border-white/5 hover:border-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`p-2 rounded-xl transition-colors ${activeGuide === idx ? 'bg-brand-primary text-white' : 'bg-white/5 text-tx-dim group-hover:text-tx-main'}`}>
+                            <guide.icon className="w-4 h-4" />
+                          </div>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${activeGuide === idx ? 'rotate-180 text-brand-primary' : 'text-tx-muted'}`} />
+                        </div>
+                        <h4 className="font-bold text-sm text-tx-main">{guide.title}</h4>
+                        <AnimatePresence>
+                          {activeGuide === idx && (
+                            <motion.p
+                              initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                              animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
+                              exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                              className="text-[11px] text-tx-dim leading-relaxed"
+                            >
+                              {guide.content}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-sm text-tx-dim">Issues with logging in? Reset your password or manage sessions.</p>
-                </div>
+                </section>
 
-                <div className="p-4 rounded-2xl bg-brand-primary/10 border border-brand-primary/20">
-                  <h4 className="font-bold mb-2 text-tx-main">Need direct support?</h4>
-                  <p className="text-sm text-tx-dim mb-4">Our team is available for technical assistance 24/7.</p>
-                  <button className="w-full bg-brand-primary text-white py-3 rounded-xl font-bold shadow-lg shadow-brand-primary/20">
-                    Contact Support
-                  </button>
-                </div>
+                {/* Support Form Section */}
+                <section className="space-y-4 pt-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-1 h-4 bg-green-500 rounded-full" />
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-tx-dim">Direct Support</h3>
+                  </div>
+
+                  {ticketStatus ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-8 rounded-[24px] bg-green-500/[0.07] border border-green-500/20 relative overflow-hidden group"
+                    >
+                      <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                        <Ticket className="w-24 h-24 text-green-400" />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-green-500/20 p-2 rounded-xl">
+                            <CheckCircle2 className="w-6 h-6 text-green-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-lg text-tx-main">Ticket Received</h4>
+                            <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-0.5 rounded uppercase tracking-wider">Status: In Queue</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-tx-dim max-w-md leading-relaxed">
+                          Your ticket <span className="text-green-400 font-bold">#{ticketStatus.id}</span> has been logged. Our student support team typically responds within <span className="text-tx-main">24 hours</span>.
+                        </p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="bg-white/[0.03] border border-white/5 rounded-[24px] p-8 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-tx-dim ml-1">Inquiry Type</label>
+                          <div className="relative group">
+                            <select 
+                              value={supportForm.subject}
+                              onChange={(e) => setSupportForm(prev => ({ ...prev, subject: e.target.value }))}
+                              className="w-full bg-bg-dark/50 border border-white/10 px-4 py-3.5 rounded-2xl text-sm text-tx-main focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/30 outline-none transition-all appearance-none cursor-pointer"
+                            >
+                              <option value="Technical Issue">Technical Issue</option>
+                              <option value="Account Access">Account Access</option>
+                              <option value="Feature Request">Feature Request</option>
+                              <option value="Bug Report">Bug Report</option>
+                              <option value="General Question">General Question</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tx-dim pointer-events-none group-hover:text-brand-primary transition-colors" />
+                          </div>
+                        </div>
+                        <div className="flex items-end">
+                          <p className="text-[10px] text-tx-muted leading-relaxed mb-1 ml-1 italic">
+                            Select the category that best fits your issue to help us route your ticket faster.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-tx-dim ml-1">Your Message</label>
+                        <textarea 
+                          value={supportForm.message}
+                          onChange={(e) => setSupportForm(prev => ({ ...prev, message: e.target.value }))}
+                          placeholder="How can we help you today?"
+                          rows={4}
+                          className="w-full bg-bg-dark/50 border border-white/10 px-5 py-4 rounded-2xl text-sm text-tx-main focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/30 outline-none transition-all placeholder:text-tx-muted resize-none leading-relaxed"
+                        />
+                      </div>
+
+                      <button 
+                        onClick={handleContactSupport}
+                        disabled={isSendingTicket}
+                        className="w-full bg-brand-primary hover:brightness-110 text-white py-4 rounded-2xl font-bold shadow-[0_20px_40px_-12px_rgba(0,184,212,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden relative group"
+                      >
+                        {isSendingTicket ? (
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <Send className="w-4 h-4" />
+                            Submit Support Ticket
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </section>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-white/5 bg-white/[0.02] flex justify-center shrink-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-tx-muted">ScholarSync Support System • v1.2</p>
               </div>
             </motion.div>
           </div>

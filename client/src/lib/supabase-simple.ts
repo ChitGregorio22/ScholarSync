@@ -240,6 +240,13 @@ export async function getChatHistory(): Promise<ChatMessage[]> {
   return proxyFetch<ChatMessage[]>('/chat/history');
 }
 
+export async function createTicket(ticketId: string, subject?: string, message?: string): Promise<any> {
+  return proxyFetch<any>('/support/tickets', {
+    method: 'POST',
+    body: JSON.stringify({ ticketId, subject, message })
+  });
+}
+
 export async function saveChatMessage(message: { role: string; content: string; context?: any }): Promise<ChatMessage> {
   return proxyFetch<ChatMessage>('/chat', {
     method: 'POST',
