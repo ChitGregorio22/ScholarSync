@@ -76,7 +76,7 @@ export default function App() {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (_event: any, session: any) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           const [courses, allLogs] = await Promise.all([
@@ -217,7 +217,6 @@ export default function App() {
         {page === "grades" && (
           <Grades
             onSubjectsChange={refreshData}
-            onLogout={handleLogout}
           />
         )}
 

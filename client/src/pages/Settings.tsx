@@ -34,6 +34,15 @@ import { createTicket, clearChatHistory, updatePassword } from "../lib/supabase-
 import { useLanguage } from "../lib/LanguageContext";
 import type { Language as LangType } from "../lib/translations";
 
+interface NotifPrefs {
+  email: boolean;
+  push: boolean;
+  academicReminders: boolean;
+  aiAdvisor: boolean;
+  securityAlerts: boolean;
+  [key: string]: boolean;
+}
+
 /**
  * Settings Page
  * 
@@ -63,7 +72,7 @@ export default function Settings() {
   const [isSendingTicket, setIsSendingTicket] = useState(false);
 
   // Notification Preferences State
-  const [notifPrefs, setNotifPrefs] = useState(() => {
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(() => {
     const saved = localStorage.getItem('ss_notif_prefs');
     return saved ? JSON.parse(saved) : {
       email: true,

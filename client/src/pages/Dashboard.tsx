@@ -245,7 +245,7 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                       borderRadius: '12px',
                       color: 'var(--text-primary)'
                     }}
-                    formatter={(value: any, name: string, props: any) => {
+                    formatter={(value: any, name: any, props: any) => {
                       if (gradingScale === 'college') {
                         return [props.payload[`raw${name}`] || value, name];
                       }
@@ -439,24 +439,27 @@ const StatCard = ({ title, value, subtitle, icon: Icon, color, trend }: any) => 
 
   return (
     <motion.div 
-      whileHover={{ y: -4 }}
-      className="glass-card p-5 space-y-3 relative overflow-hidden group"
+      whileHover={{ y: -6, scale: 1.02 }}
+      className="glass-card p-6 space-y-4 relative overflow-hidden group"
     >
       <div className="flex items-center justify-between">
-        <div className={`p-2.5 rounded-xl ${bgClass}`}>
+        <div className={`p-3 rounded-2xl ${bgClass} shadow-inner`}>
           <Icon className="w-5 h-5" />
         </div>
         {trend && (
-          <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${trend.includes('+') || trend === 'Increasing' ? 'bg-green-500/10 text-green-400' : 'bg-white/10 text-gray-400'}`}>
+          <span className={`text-[10px] font-bold px-2.5 py-1.5 rounded-xl ${trend.includes('+') || trend === 'Increasing' ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-gray-400'} border border-white/5`}>
             {trend}
           </span>
         )}
       </div>
       
       <div>
-        <p className="text-xs font-medium text-tx-muted uppercase tracking-wider">{title}</p>
-        <h4 className="text-2xl font-bold mt-1 tracking-tight">{value}</h4>
-        <p className="text-xs text-tx-dim mt-1 truncate">{subtitle}</p>
+        <p className="text-[10px] font-bold text-tx-muted uppercase tracking-[0.15em]">{title}</p>
+        <h4 className="text-3xl font-extrabold mt-2 tracking-tight text-tx-main leading-none">{value}</h4>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="w-1 h-1 rounded-full bg-brand-primary/30" />
+          <p className="text-xs text-tx-dim truncate">{subtitle}</p>
+        </div>
       </div>
     </motion.div>
   );

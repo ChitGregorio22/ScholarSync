@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
-import type { ChatMessage } from "../types/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -65,7 +64,7 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
     try {
       const history = await getChatHistory();
       if (history.length > 0) {
-        const formattedMessages: Message[] = history.map((msg: ChatMessage) => ({
+        const formattedMessages: Message[] = history.map((msg: any) => ({
           id: msg.id,
           sender: msg.role === "user" ? "user" : "ai",
           text: msg.content,
