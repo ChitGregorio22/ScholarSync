@@ -70,7 +70,11 @@ export const translations = {
     manage_academic_records: "Manage your academic profile and track study progress.",
     courses: "Courses",
     study_logs: "Study Logs",
-    manage_personal_info: "Manage your personal information and academic identity."
+    manage_personal_info: "Manage your personal information and academic identity.",
+    grading_system: "Grading System",
+    grading_description: "Choose your institution's grading scale",
+    percentage: "Percentage (0-100)",
+    college_scale: "College Scale (1.0 - 5.0)"
   },
   ES: {
     dashboard: "Panel",
@@ -141,7 +145,11 @@ export const translations = {
     manage_academic_records: "Gestiona tu perfil académico y el progreso del estudio.",
     courses: "Cursos",
     study_logs: "Registros de Estudio",
-    manage_personal_info: "Gestiona tu información personal e identidad académica."
+    manage_personal_info: "Gestiona tu información personal e identidad académica.",
+    grading_system: "Sistema de Calificación",
+    grading_description: "Elige la escala de notas de tu institución",
+    percentage: "Porcentaje (0-100)",
+    college_scale: "Escala Universitaria (1.0 - 5.0)"
   },
   FR: {
     dashboard: "Tableau de bord",
@@ -212,6 +220,10 @@ export const translations = {
     manage_academic_records: "Gérez votre profil académique et suivez vos progrès.",
     courses: "Cours",
     study_logs: "Journaux d'étude",
-    manage_personal_info: "Gérez vos informations personnelles et votre identité académique."
+    manage_personal_info: "Gérez vos informations personnelles et votre identité académique.",
+    grading_system: "Système de Notation",
+    grading_description: "Choisissez l'échelle de notation de votre école",
+    percentage: "Pourcentage (0-100)",
+    college_scale: "Échelle Universitaire (1.0 - 5.0)"
   }
 };

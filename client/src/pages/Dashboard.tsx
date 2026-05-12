@@ -43,18 +43,34 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
     }
   }, []);
   
+  const gradingScale = localStorage.getItem('ss_grading_scale') || 'percentage';
+  
   // Helper to convert grades/targets to numbers for chart
   const getNumericGrade = (val: any) => {
     if (!val) return 0;
-    if (typeof val === 'number') return val;
-    const str = String(val).toUpperCase();
-    if (str.includes('A')) return 95;
-    if (str.includes('B')) return 85;
-    if (str.includes('C')) return 75;
-    if (str.includes('D')) return 65;
-    if (str.includes('F')) return 50;
-    const num = parseInt(str.replace(/[^0-9]/g, ''));
-    return isNaN(num) ? 0 : num;
+    
+    let num: number;
+    if (typeof val === 'number') {
+      num = val;
+    } else {
+      const str = String(val).toUpperCase();
+      if (str.includes('A')) return 95;
+      if (str.includes('B')) return 85;
+      if (str.includes('C')) return 75;
+      if (str.includes('D')) return 65;
+      if (str.includes('F')) return 50;
+      num = parseFloat(str.replace(/[^0-9.]/g, ''));
+    }
+
+    if (isNaN(num)) return 0;
+
+    // Handle College Scale (1.0 - 5.0)
+    // Formula: 1.0 = 100%, 3.0 = 75%, 5.0 = 50%
+    if (gradingScale === 'college' && num <= 5.0) {
+      return Math.max(0, 100 - (num - 1.0) * 12.5);
+    }
+    
+    return num;
   };
 
   const highest =
@@ -73,6 +89,13 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
           subjects.reduce((sum, s) => sum + getNumericGrade(s.grade || s.target_grade), 0) / subjects.length
         )
       : 0;
+
+  const displayGPA = subjects.length > 0
+    ? (subjects.reduce((sum, s) => {
+        const val = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+        return sum + (isNaN(val) ? 0 : val);
+      }, 0) / subjects.length).toFixed(2)
+    : "0.00";
 
   const totalStudyHours = studyLogs.reduce((sum, log) => sum + (log.hours_studied || 0), 0);
   const displayHours = Math.floor(totalStudyHours);
@@ -120,7 +143,7 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title={t('gpa_equivalent')} 
-          value={`${avgGrade}%`} 
+          value={gradingScale === 'college' ? displayGPA : `${avgGrade}%`} 
           subtitle={t('overall_average')}
           icon={Award}
           color="brand-primary"
@@ -136,14 +159,14 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
         />
         <StatCard 
           title={t('best_subject')} 
-          value={highest?.grade ? `${highest.grade}%` : "-"} 
+          value={highest?.grade ? (gradingScale === 'college' ? highest.grade : `${highest.grade}%`) : "-"} 
           subtitle={highest?.course_name || "N/A"}
           icon={TrendingUp}
           color="emerald-400"
         />
         <StatCard 
           title={t('needs_focus')} 
-          value={weakest?.grade ? `${weakest.grade}%` : "-"} 
+          value={weakest?.grade ? (gradingScale === 'college' ? weakest.grade : `${weakest.grade}%`) : "-"} 
           subtitle={weakest?.course_name || "N/A"}
           icon={TrendingDown}
           color="rose-400"
