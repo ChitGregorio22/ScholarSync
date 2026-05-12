@@ -118,14 +118,28 @@ async function proxyFetch<T = any>(endpoint: string, options: FetchOptions = {})
     ...(options.headers || {})
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers
-  });
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers
+    });
 
-  const data = await response.json();
-  if (!response.ok) throw data;
-  return data;
+    if (response.status === 401) {
+      // Token expired or invalid
+      console.warn("Session expired or unauthorized. Logging out...");
+      signOut().then(() => {
+        window.location.reload(); // Refresh to clear state
+      });
+      throw new Error("Unauthorized");
+    }
+
+    const data = await response.json();
+    if (!response.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error(`ProxyFetch error (${endpoint}):`, error);
+    throw error;
+  }
 }
 
 // ============================================

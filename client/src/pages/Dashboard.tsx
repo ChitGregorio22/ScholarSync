@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { 
   TrendingUp, 
   TrendingDown, 
-  Users, 
   BrainCircuit, 
   ArrowUpRight,
   Target,
@@ -193,7 +192,7 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                     radius={[6, 6, 0, 0]}
                     barSize={40}
                   >
-                    {subjects.map((entry, index) => (
+                    {subjects.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#a855f7'} fillOpacity={0.8} />
                     ))}
                   </Bar>

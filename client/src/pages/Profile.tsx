@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   User, 
   Save, 
   Calendar as CalendarIcon, 
-  CheckCircle2, 
-  XCircle, 
   Sparkles,
   GraduationCap,
   School,
@@ -14,16 +12,11 @@ import {
 } from "lucide-react";
 import { getProfile, updateProfile } from "../lib/supabase-simple";
 
+import { useLanguage } from "../lib/LanguageContext";
+
 type AttendanceDay = {
   date: string; // YYYY-MM-DD
   status: "present" | "absent";
-};
-
-type ProfileData = {
-  full_name: string;
-  student_id: string;
-  institution: string;
-  major: string;
 };
 
 /**

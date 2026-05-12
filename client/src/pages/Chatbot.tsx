@@ -24,6 +24,8 @@ interface Message {
   timestamp: Date;
 }
 
+import { useLanguage } from "../lib/LanguageContext";
+
 /**
  * AI Student Performance Advisor
  * 
