@@ -23,8 +23,7 @@ import {
   ChevronDown,
   Book,
   Send,
-  Ticket,
-  Award
+  Ticket
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createTicket } from "../lib/supabase-simple";
@@ -66,18 +65,10 @@ export default function Settings() {
     };
   });
 
-  const [gradingScale, setGradingScale] = useState<'percentage' | 'college'>(() => {
-    return (localStorage.getItem('ss_grading_scale') as any) || 'percentage';
-  });
-
-  // Save notif prefs to local storage
+  // Initialize from document classes
   useEffect(() => {
     localStorage.setItem('ss_notif_prefs', JSON.stringify(notifPrefs));
   }, [notifPrefs]);
-
-  useEffect(() => {
-    localStorage.setItem('ss_grading_scale', gradingScale);
-  }, [gradingScale]);
 
   // Initialize from document classes
   useEffect(() => {
@@ -121,12 +112,6 @@ export default function Settings() {
     setStatusMessage({ text: `Language set to ${next === 'EN' ? 'English' : next === 'ES' ? 'Spanish' : 'French'}`, type: 'success' });
   };
 
-  const toggleGradingScale = () => {
-    const next = gradingScale === 'percentage' ? 'college' : 'percentage';
-    setGradingScale(next);
-    setStatusMessage({ text: `Grading set to ${next === 'college' ? 'College (1.0-5.0)' : 'Percentage'}`, type: 'success' });
-  };
-
   const handleAction = (id: string) => {
     if (id === "appearance") {
       toggleTheme();
@@ -138,8 +123,6 @@ export default function Settings() {
       setShowHelp(true);
     } else if (id === "notifications") {
       setShowNotifications(true);
-    } else if (id === "grading") {
-      toggleGradingScale();
     } else if (id === "privacy") {
       setStatusMessage({ text: "Security settings verified", type: 'success' });
     } else {
@@ -211,7 +194,6 @@ export default function Settings() {
       icon: SettingsIcon,
       items: [
         { id: "language", label: t('language'), icon: Globe, description: t('language_description'), value: language },
-        { id: "grading", label: t('grading_system'), icon: Award, description: t('grading_description'), value: gradingScale === 'college' ? "1.0-5.0" : "0-100" },
         { id: "sync", label: t('device_sync'), icon: Smartphone, description: t('device_sync_description') },
         { id: "accessibility", label: t('accessibility'), icon: Eye, description: t('accessibility_description'), value: isHighContrast || isDyslexicFont ? "ACTIVE" : "OFF" },
       ]

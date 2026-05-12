@@ -42,7 +42,19 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
     }
   }, []);
   
-  const gradingScale = localStorage.getItem('ss_grading_scale') || 'percentage';
+  // Smart Auto-Detection for grading scale
+  const detectedScale = subjects.length > 0 && 
+    subjects.some(s => {
+      const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+      return !isNaN(v) && v > 0 && v <= 5.0;
+    }) && !subjects.some(s => {
+      const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+      return v > 5.0;
+    }) ? 'college' : 'percentage';
+
+  // Prioritize auto-detected 'college' scale if we see GPA-style values
+  const savedScale = localStorage.getItem('ss_grading_scale');
+  const gradingScale = (detectedScale === 'college') ? 'college' : (savedScale || 'percentage');
   
   // Helper to convert grades/targets to numbers for chart
   const getNumericGrade = (val: any) => {
@@ -92,8 +104,11 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
   const displayGPA = subjects.length > 0
     ? (subjects.reduce((sum, s) => {
         const val = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
-        return sum + (isNaN(val) ? 0 : val);
-      }, 0) / subjects.length).toFixed(2)
+        return sum + (isNaN(val) || val === 0 ? 0 : val);
+      }, 0) / subjects.filter(s => {
+        const v = parseFloat(String(s.grade || s.target_grade).replace(/[^0-9.]/g, ''));
+        return !isNaN(v) && v > 0;
+      }).length || 1).toFixed(2)
     : "0.00";
 
   const totalStudyHours = studyLogs.reduce((sum, log) => sum + (log.hours_studied || 0), 0);
@@ -143,10 +158,10 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
         <StatCard 
           title={t('gpa_equivalent')} 
           value={gradingScale === 'college' ? displayGPA : `${avgGrade}%`} 
-          subtitle={t('overall_average')}
+          subtitle={gradingScale === 'college' ? `Equivalent to ~${avgGrade}%` : t('overall_average')}
           icon={Award}
           color="brand-primary"
-          trend="+2.4%"
+          trend={gradingScale === 'college' ? (parseFloat(displayGPA) <= 3.0 ? "+5.2%" : "-1.4%") : "+2.4%"}
         />
         <StatCard 
           title={t('study_time')} 
@@ -191,11 +206,19 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
           <div className="flex-1 w-full min-h-[300px]">
             {subjects.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={subjects.map(s => ({
-                  ...s,
-                  current: getNumericGrade(s.grade),
-                  target: getNumericGrade(s.target_grade)
-                }))}>
+                <BarChart 
+                  data={subjects.map(s => {
+                    return {
+                      ...s,
+                      // For the bars, we use the percentage for consistent visual height
+                      current: getNumericGrade(s.grade),
+                      target: getNumericGrade(s.target_grade),
+                      // For the tooltip/display
+                      rawCurrent: s.grade,
+                      rawTarget: s.target_grade
+                    };
+                  })}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                   <XAxis 
                     dataKey="course_name" 
@@ -209,7 +232,8 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                     fontSize={12} 
                     tickLine={false} 
                     axisLine={false}
-                    domain={[0, 100]}
+                    domain={gradingScale === 'college' ? [50, 100] : [0, 100]}
+                    tickFormatter={(val) => gradingScale === 'college' ? ((100 - val) / 12.5 + 1).toFixed(1) : `${val}%`}
                   />
                   <Tooltip 
                     cursor={{ fill: '#ffffff05' }}
@@ -218,6 +242,12 @@ export default function Dashboard({ subjects = [], studyLogs = [], assessments =
                       border: '1px solid var(--border-color)',
                       borderRadius: '12px',
                       color: 'var(--text-primary)'
+                    }}
+                    formatter={(value: any, name: string, props: any) => {
+                      if (gradingScale === 'college') {
+                        return [props.payload[`raw${name}`] || value, name];
+                      }
+                      return [`${value}%`, name];
                     }}
                   />
                   <Bar 

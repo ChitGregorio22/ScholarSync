@@ -11,6 +11,7 @@ CREATE TABLE courses (
     course_code TEXT,
     credits INTEGER DEFAULT 3,
     target_grade TEXT,
+    grade TEXT,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
