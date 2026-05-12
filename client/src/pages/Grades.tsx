@@ -43,7 +43,7 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
   const [studyLogs, setStudyLogs] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "courses" | "logs">("courses");
+  const [activeTab, setActiveTab] = useState<"courses" | "logs">("courses");
 
   // Form states
   const [courseName, setCourseName] = useState("");
@@ -215,7 +215,6 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
           {[
             { id: "courses", label: "Courses", icon: BookOpen },
             { id: "logs", label: "Study Logs", icon: Clock },
-            { id: "profile", label: "Profile", icon: User },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -234,90 +233,6 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
       </header>
 
       <AnimatePresence mode="wait">
-        {activeTab === "profile" && (
-          <motion.div 
-            key="profile"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid lg:grid-cols-3 gap-8"
-          >
-            <div className="lg:col-span-2 glass-card p-8 space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">Personal Information</h3>
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                  className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-bold transition active:scale-95 disabled:opacity-50"
-                >
-                  {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save Changes
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Full Name</label>
-                  <input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="E.g. John Doe"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Student ID</label>
-                  <input
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="E.g. 2024-00123"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Institution</label>
-                  <input
-                    value={institution}
-                    onChange={(e) => setInstitution(e.target.value)}
-                    placeholder="E.g. University of Technology"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Major / Program</label>
-                  <input
-                    value={major}
-                    onChange={(e) => setMajor(e.target.value)}
-                    placeholder="E.g. Computer Science"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="glass-card p-6 bg-brand-primary/5 border-brand-primary/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Sparkles className="w-5 h-5 text-brand-primary" />
-                  <h4 className="font-bold">Profile Tips</h4>
-                </div>
-                <p className="text-sm text-gray-400 leading-relaxed">
-                  Completing your profile helps ScholarSync AI provide more context-aware advice specific to your major and institution.
-                </p>
-              </div>
-              
-              <div className="glass-card p-6 border-red-500/10">
-                <h4 className="font-bold text-red-400 mb-4">Danger Zone</h4>
-                <button
-                  onClick={onLogout}
-                  className="w-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 py-3 rounded-xl font-bold transition-all"
-                >
-                  Sign Out of Account
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {activeTab === "courses" && (
           <motion.div 

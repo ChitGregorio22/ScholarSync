@@ -7,6 +7,7 @@ import Grades from "./pages/Grades";
 import Profile from "./pages/Profile";
 import Chatbot from "./pages/Chatbot";
 import ChatHistory from "./pages/ChatHistory";
+import Settings from "./pages/Settings";
 import { supabase, getSession, signOut, getCourses, getStudyLogs, getAssessments } from "./lib/supabase-simple";
 
 export default function App() {
@@ -220,6 +221,11 @@ export default function App() {
         {/* PROFILE */}
         {page === "profile" && (
           <Profile />
+        )}
+
+        {/* SETTINGS */}
+        {page === "settings" && (
+          <Settings />
         )}
 
         {/* CHAT */}
