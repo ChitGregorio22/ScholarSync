@@ -241,7 +241,7 @@ export default function Settings() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowNotifications(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 bg-black/60 backdrop-blur-md"
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -311,7 +311,7 @@ export default function Settings() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowAccessibility(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 bg-black/60 backdrop-blur-md"
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -386,7 +386,7 @@ export default function Settings() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowHelp(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
             />
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 30 }}
@@ -470,8 +470,8 @@ export default function Settings() {
                         <Ticket className="w-24 h-24 text-green-400" />
                       </div>
                       <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="bg-green-500/20 p-2 rounded-xl">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                          <div className="bg-green-500/20 p-2 rounded-xl w-fit">
                             <CheckCircle2 className="w-6 h-6 text-green-400" />
                           </div>
                           <div>
@@ -479,8 +479,8 @@ export default function Settings() {
                             <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-0.5 rounded uppercase tracking-wider">Status: In Queue</span>
                           </div>
                         </div>
-                        <p className="text-sm text-tx-dim max-w-md leading-relaxed">
-                          Your ticket <span className="text-green-400 font-bold">#{ticketStatus.id}</span> has been logged. Our student support team typically responds within <span className="text-tx-main">24 hours</span>.
+                        <p className="text-sm text-tx-dim leading-relaxed">
+                          Your ticket <span className="text-green-400 font-bold">#{ticketStatus.id}</span> has been logged. Our student support team typically responds within <span className="text-tx-main font-bold">24 hours</span>.
                         </p>
                       </div>
                     </motion.div>
