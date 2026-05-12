@@ -23,10 +23,14 @@ import {
   ChevronDown,
   Book,
   Send,
-  Ticket
+  Ticket,
+  Trash2,
+  Lock,
+  Key,
+  Save
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { createTicket } from "../lib/supabase-simple";
+import { createTicket, clearChatHistory, updatePassword } from "../lib/supabase-simple";
 import { useLanguage } from "../lib/LanguageContext";
 import type { Language as LangType } from "../lib/translations";
 
@@ -43,6 +47,10 @@ export default function Settings() {
   const [showHelp, setShowHelp] = useState(false);
   const [showAccessibility, setShowAccessibility] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [activeGuide, setActiveGuide] = useState<number | null>(null);
   const [ticketStatus, setTicketStatus] = useState<{ id: string, status: string } | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string, type: 'info' | 'success' } | null>(null);
@@ -124,7 +132,7 @@ export default function Settings() {
     } else if (id === "notifications") {
       setShowNotifications(true);
     } else if (id === "privacy") {
-      setStatusMessage({ text: "Security settings verified", type: 'success' });
+      setShowPrivacy(true);
     } else {
       setStatusMessage({ text: `Setting updated`, type: 'info' });
     }
@@ -133,6 +141,36 @@ export default function Settings() {
   const toggleNotif = (key: keyof typeof notifPrefs) => {
     setNotifPrefs(prev => ({ ...prev, [key]: !prev[key] }));
     setStatusMessage({ text: "Preference updated", type: 'success' });
+  };
+
+  const handleClearHistory = async () => {
+    try {
+      await clearChatHistory();
+      setStatusMessage({ text: "Chat history cleared", type: 'success' });
+    } catch (err) {
+      console.error("Failed to clear history:", err);
+      setStatusMessage({ text: "Error clearing history", type: 'info' });
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setStatusMessage({ text: "Password must be at least 6 characters", type: 'info' });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await updatePassword(newPassword);
+      setStatusMessage({ text: "Password updated successfully", type: 'success' });
+      setShowPasswordModal(false);
+      setNewPassword("");
+    } catch (err: any) {
+      console.error("Failed to update password:", err);
+      setStatusMessage({ text: err.message || "Error updating password", type: 'info' });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   };
 
   const handleContactSupport = async () => {
@@ -296,6 +334,144 @@ export default function Settings() {
                     )}
                   </button>
                 ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Privacy Modal */}
+      <AnimatePresence>
+        {showPrivacy && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPrivacy(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="glass-card w-full max-w-md p-8 relative z-10 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="bg-brand-primary/20 p-2 rounded-lg">
+                    <Shield className="w-6 h-6 text-brand-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-tx-main">Privacy & Security</h2>
+                </div>
+                <button onClick={() => setShowPrivacy(false)} className="p-2 hover:bg-bg-hover rounded-full transition">
+                  <X className="w-5 h-5 text-tx-dim" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-5 h-5 text-brand-primary" />
+                    <p className="font-bold text-sm">Data Control</p>
+                  </div>
+                  <p className="text-xs text-tx-dim leading-relaxed">
+                    You have full control over your academic data. Clearing your chat history will permanently remove all past conversations with the AI Advisor from our servers.
+                  </p>
+                  <button 
+                    onClick={handleClearHistory}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-all border border-rose-500/20 font-bold text-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Clear Chat History
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-5 h-5 text-emerald-400" />
+                    <p className="font-bold text-sm">Account Security</p>
+                  </div>
+                  <p className="text-xs text-tx-dim leading-relaxed">
+                    Your session is protected with end-to-end encryption. To fully secure your account, ensure you log out after using ScholarSync on shared devices.
+                  </p>
+                  <button 
+                    onClick={() => {
+                      setShowPrivacy(false);
+                      setShowPasswordModal(true);
+                    }}
+                    className="w-full py-3 bg-white/5 hover:bg-white/10 text-tx-main rounded-xl transition-all border border-white/10 font-bold text-sm"
+                  >
+                    Manage Account
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Password Modal */}
+      <AnimatePresence>
+        {showPasswordModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPasswordModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="glass-card w-full max-w-md p-8 relative z-10 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="bg-brand-primary/20 p-2 rounded-lg">
+                    <Key className="w-6 h-6 text-brand-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-tx-main">Account Security</h2>
+                </div>
+                <button onClick={() => setShowPasswordModal(false)} className="p-2 hover:bg-bg-hover rounded-full transition">
+                  <X className="w-5 h-5 text-tx-dim" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-tx-dim ml-1">New Password</label>
+                  <input 
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter at least 6 characters"
+                    className="w-full bg-white/5 border border-white/10 px-5 py-4 rounded-2xl text-sm text-tx-main focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/30 outline-none transition-all placeholder:text-tx-muted"
+                  />
+                </div>
+
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <p className="text-[10px] text-tx-dim leading-relaxed">
+                    <span className="text-brand-primary font-bold">Security Note:</span> Choosing a strong, unique password helps protect your academic data and personal information.
+                  </p>
+                </div>
+
+                <button 
+                  onClick={handleUpdatePassword}
+                  disabled={isUpdatingPassword}
+                  className="w-full bg-brand-primary hover:brightness-110 text-white py-4 rounded-2xl font-bold shadow-[0_20px_40px_-12px_rgba(0,184,212,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {isUpdatingPassword ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Update Password
+                    </>
+                  )}
+                </button>
               </div>
             </motion.div>
           </div>

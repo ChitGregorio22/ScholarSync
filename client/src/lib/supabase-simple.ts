@@ -31,7 +31,11 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const API_URL = 'http://localhost:5000/api';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Singleton pattern to avoid "Multiple GoTrueClient instances" warning
+if (!(window as any)._supabaseInstance) {
+  (window as any)._supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+}
+export const supabase = (window as any)._supabaseInstance;
 
 // ============================================
 // AUTH FUNCTIONS (Using Local Backend)
@@ -70,6 +74,12 @@ export async function signIn(email: string, password: string) {
 export async function signOut() {
   localStorage.removeItem('ss_session');
   await supabase.auth.signOut().catch(() => {});
+}
+
+export async function updatePassword(newPassword: string) {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+  return data;
 }
 
 export async function getUser() {
@@ -239,6 +249,10 @@ export async function updateProfile(updates: any): Promise<any> {
 
 export async function getChatHistory(): Promise<ChatMessage[]> {
   return proxyFetch<ChatMessage[]>('/chat/history');
+}
+
+export async function clearChatHistory(): Promise<{ status: string }> {
+  return proxyFetch<{ status: string }>('/chat/history', { method: 'DELETE' });
 }
 
 export async function createTicket(ticketId: string, subject?: string, message?: string): Promise<any> {
