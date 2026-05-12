@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
-import type { ChatMessage } from "../types/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -24,16 +23,19 @@ interface Message {
   timestamp: Date;
 }
 
+import { useLanguage } from "../lib/LanguageContext";
+
 /**
- * Chatbot Component
+ * AI Student Performance Advisor
  * 
- * Premium AI Advisor chat interface with animations and context-aware insights.
+ * Chat interface with animations and context-aware insights.
  * Integrates with Google Gemini API for personalized academic advice.
  * 
  * @param {Object} props
  * @param {Function} props.onBack - Optional callback to go back
  */
-export default function Chatbot({ onBack }: { onBack?: () => void }) {
+export default function Chatbot({ onBack, isFullscreen: initialFullscreen = false }: { onBack?: () => void, isFullscreen?: boolean }) {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -44,7 +46,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(initialFullscreen);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -62,7 +64,7 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
     try {
       const history = await getChatHistory();
       if (history.length > 0) {
-        const formattedMessages: Message[] = history.map((msg: ChatMessage) => ({
+        const formattedMessages: Message[] = history.map((msg: any) => ({
           id: msg.id,
           sender: msg.role === "user" ? "user" : "ai",
           text: msg.content,
@@ -142,10 +144,10 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
   };
 
   return (
-    <div className={`flex flex-col bg-bg-dark text-white rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl border border-white/5 ${isFullscreen ? 'fixed inset-4 z-[100]' : 'h-[calc(100vh-2rem)]'}`}>
+    <div className={`flex flex-col bg-bg-dark text-tx-main rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl border border-border-subtle ${isFullscreen ? 'fixed inset-4 z-[100]' : 'h-[calc(100vh-2rem)]'}`}>
 
       {/* HEADER */}
-      <header className="p-5 flex justify-between items-center bg-bg-card border-b border-white/5 backdrop-blur-md bg-opacity-80">
+      <header className="p-5 flex justify-between items-center bg-bg-card border-b border-border-subtle backdrop-blur-md bg-opacity-80">
         <div className="flex items-center gap-4">
           {onBack && (
             <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-xl transition">
@@ -157,19 +159,22 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
               <Bot className="w-6 h-6 text-brand-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold tracking-tight">AI Academic Advisor</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+              <h2 className="text-xl font-bold tracking-tight text-tx-main">{t('ai_advisor')}</h2>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[10px] font-bold text-green-500/80 uppercase tracking-widest">Active Insight</p>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="bg-transparent text-[10px] text-gray-400 border-none focus:ring-0 p-0 cursor-pointer hover:text-white transition-colors uppercase tracking-widest font-bold"
+                  className="bg-transparent text-[10px] text-tx-dim border-none focus:ring-0 p-0 cursor-pointer hover:text-tx-main transition-colors uppercase tracking-widest font-bold"
                 >
-                  <option value="gemini-2.5-flash" className="bg-bg-card">Gemini 2.5 Flash</option>
-                  <option value="gemini-2.5-pro" className="bg-bg-card">Gemini 2.5 Pro</option>
-                  <option value="gemma-4-31b-it" className="bg-bg-card">Gemma 4 (31B)</option>
-                  <option value="gemini-flash-latest" className="bg-bg-card">Latest Flash</option>
+                  <option value="gemini-2.5-flash" className="bg-bg-card text-tx-main">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.0-flash" className="bg-bg-card text-tx-main">Gemini 2.0 Flash</option>
+                  <option value="gemini-flash-latest" className="bg-bg-card text-tx-main">Latest Flash</option>
                 </select>
+
+
+
               </div>
             </div>
           </div>
@@ -211,11 +216,11 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
               <div className={`relative group max-w-[80%] md:max-w-[70%] ${msg.sender === "user" ? "order-1" : "order-2"}`}>
                 <div className={`px-5 py-4 rounded-3xl shadow-sm text-sm leading-relaxed ${msg.sender === "user"
                   ? "bg-brand-primary text-white rounded-br-none"
-                  : "bg-white/5 border border-white/5 text-gray-200 rounded-bl-none"
+                  : "bg-bg-hover border border-border-subtle text-tx-main rounded-bl-none shadow-inner"
                   }`}>
                   {msg.text}
                 </div>
-                <span className={`text-[10px] text-gray-600 font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
+                <span className={`text-[10px] text-tx-muted font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -281,9 +286,9 @@ export default function Chatbot({ onBack }: { onBack?: () => void }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
-            placeholder="Ask anything about your academic progress..."
+            placeholder={t('ask_anything')}
             disabled={loading}
-            className="w-full bg-bg-dark border border-white/5 pl-6 pr-16 py-4 rounded-2xl focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50 shadow-inner"
+            className="w-full bg-bg-dark border border-border-subtle pl-6 pr-16 py-4 rounded-2xl focus:outline-none focus:border-brand-primary transition-all text-tx-main placeholder:text-tx-muted disabled:opacity-50 shadow-inner"
           />
           <button
             onClick={() => sendMessage()}

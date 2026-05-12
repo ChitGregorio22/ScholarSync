@@ -8,6 +8,7 @@ import {
   BookOpen
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "../lib/LanguageContext";
 
 /**
  * Sidebar Component
@@ -19,29 +20,31 @@ import { motion } from "framer-motion";
  * @param {string} props.currentPage - The current active page ID
  */
 export default function Sidebar({ setPage, currentPage, onLogout }: { setPage: (page: string) => void, currentPage: string, onLogout?: () => void }) {
+  const { t } = useLanguage();
+  
   const menuItems = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { id: "grades", icon: BookOpen, label: "Grades Manager" },
-    { id: "chat", icon: MessageSquare, label: "AI Advisor" },
-    { id: "profile", icon: User, label: "Profile" },
+    { id: "dashboard", icon: LayoutDashboard, label: t('dashboard') },
+    { id: "grades", icon: BookOpen, label: t('grades_manager') },
+    { id: "chat", icon: MessageSquare, label: t('ai_advisor') },
+    { id: "profile", icon: User, label: t('profile') },
   ];
 
   return (
-    <aside className="w-72 min-h-screen bg-bg-card border-r border-white/5 flex flex-col p-6 sticky top-0">
+    <aside className="w-72 h-screen bg-bg-card border-r border-border-subtle flex flex-col p-6 overflow-y-auto custom-scrollbar transition-colors">
       
       {/* Brand */}
       <div className="flex items-center gap-3 mb-10 px-2">
         <div className="bg-brand-primary p-2 rounded-xl">
           <GraduationCap className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-white">
+        <h1 className="text-xl font-bold tracking-tight text-tx-main">
           Scholar<span className="text-brand-primary">Sync</span>
         </h1>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-4 mb-4">Main Menu</p>
+        <p className="text-[10px] font-bold text-tx-muted uppercase tracking-widest px-4 mb-4">{t('main_menu')}</p>
         
         {menuItems.map((item) => {
           const isActive = currentPage === item.id;
@@ -52,7 +55,7 @@ export default function Sidebar({ setPage, currentPage, onLogout }: { setPage: (
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative ${
                 isActive 
                   ? "bg-brand-primary/10 text-brand-primary" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
+                  : "text-tx-dim hover:text-tx-main hover:bg-bg-hover"
               }`}
             >
               {isActive && (
@@ -70,13 +73,13 @@ export default function Sidebar({ setPage, currentPage, onLogout }: { setPage: (
       </nav>
 
       {/* Bottom Actions */}
-      <div className="pt-6 border-t border-white/5 space-y-2">
+      <div className="pt-6 border-t border-border-subtle space-y-2">
         <button
           onClick={() => setPage("settings")}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all group"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-tx-dim hover:text-tx-main hover:bg-bg-hover transition-all group"
         >
           <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
-          <span className="font-medium text-sm">Settings</span>
+          <span className="font-medium text-sm">{t('settings')}</span>
         </button>
         
         <button
@@ -84,7 +87,7 @@ export default function Sidebar({ setPage, currentPage, onLogout }: { setPage: (
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-400/5 transition-all group"
         >
           <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
-          <span className="font-medium text-sm">Logout</span>
+          <span className="font-medium text-sm">{t('logout')}</span>
         </button>
       </div>
 

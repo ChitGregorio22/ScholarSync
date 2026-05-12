@@ -6,8 +6,6 @@ import {
   getStudyLogs, 
   createStudyLog,
   deleteStudyLog,
-  getProfile,
-  updateProfile,
   type Course,
   type StudyLog
 } from "../lib/supabase-simple";
@@ -15,21 +13,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
   Trash2, 
-  User, 
   BookOpen, 
   Clock, 
-  Save, 
   Calendar,
-  CheckCircle2,
   GraduationCap,
-  Sparkles,
   BarChart3,
   FileText
 } from "lucide-react";
+import { useLanguage } from "../lib/LanguageContext";
 
 interface GradesProps {
   onSubjectsChange: () => void;
-  onLogout: () => void;
 }
 
 /**
@@ -38,29 +32,25 @@ interface GradesProps {
  * Comprehensive academic management page including profile, course CRUD, 
  * and study log tracking. Features a premium design with animated interactions.
  */
-export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
+export default function Grades({ onSubjectsChange }: GradesProps) {
+  const { t } = useLanguage();
   const [courses, setCourses] = useState<Course[]>([]);
   const [studyLogs, setStudyLogs] = useState<StudyLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "courses" | "logs">("courses");
+  const [activeTab, setActiveTab] = useState<"courses" | "logs">("courses");
 
   // Form states
   const [courseName, setCourseName] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [credits, setCredits] = useState("");
   const [targetGrade, setTargetGrade] = useState("");
+  const [currentGrade, setCurrentGrade] = useState("");
 
   const [studyCourseId, setStudyCourseId] = useState("");
   const [studyHours, setStudyHours] = useState("");
   const [studyDate, setStudyDate] = useState(new Date().toISOString().split('T')[0]);
   const [studyNotes, setStudyNotes] = useState("");
-
-  // Profile states
-  const [fullName, setFullName] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [institution, setInstitution] = useState("");
-  const [major, setMajor] = useState("");
 
   useEffect(() => {
     loadData();
@@ -69,42 +59,17 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [coursesData, logsData, profileData] = await Promise.all([
+      const [coursesData, logsData] = await Promise.all([
         getCourses(),
-        getStudyLogs(),
-        getProfile().catch(() => null)
+        getStudyLogs()
       ]);
       
       setCourses(coursesData);
       setStudyLogs(logsData);
-      
-      if (profileData) {
-        setFullName(profileData.full_name || "");
-        setStudentId(profileData.student_id || "");
-        setInstitution(profileData.institution || "");
-        setMajor(profileData.major || "");
-      }
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setSaving(true);
-    try {
-      await updateProfile({
-        full_name: fullName,
-        student_id: studentId,
-        institution,
-        major
-      });
-      // Success visual feedback could go here
-    } catch (error: any) {
-      console.error("Error saving profile:", error);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -116,12 +81,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
         course_name: courseName,
         course_code: courseCode || undefined,
         credits: credits ? parseInt(credits) : undefined,
-        target_grade: targetGrade || undefined
+        target_grade: targetGrade || undefined,
+        grade: currentGrade || undefined
       });
       setCourseName("");
       setCourseCode("");
       setCredits("");
       setTargetGrade("");
+      setCurrentGrade("");
       await loadData();
       onSubjectsChange();
     } catch (error: any) {
@@ -207,15 +174,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
             <GraduationCap className="w-5 h-5 text-brand-primary" />
             <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">Academic Management</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight">Grades & Records</h1>
-          <p className="text-gray-400 mt-2">Manage your academic profile and track study progress.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight">{t('grades_manager')}</h1>
+          <p className="text-tx-dim mt-2">{t('manage_academic_records')}</p>
         </div>
 
-        <div className="flex bg-bg-card p-1.5 rounded-2xl border border-white/5 shadow-inner">
+        <div className="flex bg-bg-card p-1.5 rounded-2xl border border-border-subtle shadow-inner">
           {[
-            { id: "courses", label: "Courses", icon: BookOpen },
-            { id: "logs", label: "Study Logs", icon: Clock },
-            { id: "profile", label: "Profile", icon: User },
+            { id: "courses", label: t('courses'), icon: BookOpen },
+            { id: "logs", label: t('study_logs'), icon: Clock },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -223,7 +189,7 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold ${
                 activeTab === tab.id 
                   ? "bg-brand-primary text-white shadow-lg" 
-                  : "text-gray-500 hover:text-white"
+                  : "text-tx-dim hover:text-tx-main hover:bg-bg-hover"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -234,90 +200,6 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
       </header>
 
       <AnimatePresence mode="wait">
-        {activeTab === "profile" && (
-          <motion.div 
-            key="profile"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid lg:grid-cols-3 gap-8"
-          >
-            <div className="lg:col-span-2 glass-card p-8 space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">Personal Information</h3>
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                  className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-bold transition active:scale-95 disabled:opacity-50"
-                >
-                  {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save Changes
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Full Name</label>
-                  <input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="E.g. John Doe"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Student ID</label>
-                  <input
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="E.g. 2024-00123"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Institution</label>
-                  <input
-                    value={institution}
-                    onChange={(e) => setInstitution(e.target.value)}
-                    placeholder="E.g. University of Technology"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Major / Program</label>
-                  <input
-                    value={major}
-                    onChange={(e) => setMajor(e.target.value)}
-                    placeholder="E.g. Computer Science"
-                    className="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl focus:outline-none focus:border-brand-primary transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="glass-card p-6 bg-brand-primary/5 border-brand-primary/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Sparkles className="w-5 h-5 text-brand-primary" />
-                  <h4 className="font-bold">Profile Tips</h4>
-                </div>
-                <p className="text-sm text-gray-400 leading-relaxed">
-                  Completing your profile helps ScholarSync AI provide more context-aware advice specific to your major and institution.
-                </p>
-              </div>
-              
-              <div className="glass-card p-6 border-red-500/10">
-                <h4 className="font-bold text-red-400 mb-4">Danger Zone</h4>
-                <button
-                  onClick={onLogout}
-                  className="w-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 py-3 rounded-xl font-bold transition-all"
-                >
-                  Sign Out of Account
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {activeTab === "courses" && (
           <motion.div 
@@ -339,33 +221,39 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
                   value={courseName}
                   onChange={(e) => setCourseName(e.target.value)}
                   placeholder="Course Name"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   value={courseCode}
                   onChange={(e) => setCourseCode(e.target.value)}
                   placeholder="Code (e.g. CS101)"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   type="number"
                   value={credits}
                   onChange={(e) => setCredits(e.target.value)}
                   placeholder="Credits"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
                 <input
                   value={targetGrade}
                   onChange={(e) => setTargetGrade(e.target.value)}
                   placeholder="Target Grade"
-                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
+                />
+                <input
+                  value={currentGrade}
+                  onChange={(e) => setCurrentGrade(e.target.value)}
+                  placeholder="Current Grade"
+                  className="bg-bg-hover border border-border-subtle p-3 rounded-xl focus:outline-none focus:border-brand-primary transition-all text-sm text-tx-main placeholder:text-tx-muted"
                 />
               </div>
               <div className="mt-4 flex justify-end">
                 <button
                   onClick={addCourse}
                   disabled={saving || !courseName}
-                  className="bg-white text-black px-8 py-2.5 rounded-xl font-bold hover:bg-gray-200 transition active:scale-95 disabled:opacity-50"
+                  className="bg-brand-primary text-white px-8 py-2.5 rounded-xl font-bold hover:bg-brand-primary/90 transition active:scale-95 disabled:opacity-50 shadow-lg shadow-brand-primary/20"
                 >
                   Create Course
                 </button>
@@ -402,17 +290,14 @@ export default function Grades({ onSubjectsChange, onLogout }: GradesProps) {
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Target</span>
-                        <span className="text-lg font-extrabold text-brand-primary">{course.target_grade || "N/A"}</span>
+                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Current</span>
+                        <span className="text-lg font-extrabold text-tx-main">{course.grade || "N/A"}</span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Status</span>
-                        <span className="text-xs font-bold flex items-center gap-1 text-green-400">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Active
-                        </span>
+                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Target</span>
+                        <span className="text-lg font-extrabold text-brand-primary">{course.target_grade || "N/A"}</span>
                       </div>
                     </div>
                   </motion.div>

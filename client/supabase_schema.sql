@@ -11,6 +11,7 @@ CREATE TABLE courses (
     course_code TEXT,
     credits INTEGER DEFAULT 3,
     target_grade TEXT,
+    grade TEXT,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -193,3 +194,25 @@ BEGIN
     RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- SUPPORT TICKETS TABLE
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    ticket_id TEXT NOT NULL,
+    subject TEXT DEFAULT 'General Support',
+    message TEXT,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_review', 'resolved', 'closed')),
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS POLICIES FOR SUPPORT TICKETS
+ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own tickets"
+ON public.support_tickets FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own tickets"
+ON public.support_tickets FOR INSERT
+WITH CHECK (auth.uid() = user_id);

@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { signIn, signUp } from "../lib/supabase-simple";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { 
-  GraduationCap, 
-  Rocket, 
-  CheckCircle2, 
-  ArrowRight, 
-  Mail, 
-  Lock, 
-  User, 
-  LayoutDashboard, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  GraduationCap,
+  Rocket,
+  CheckCircle2,
+  ArrowRight,
+  Mail,
+  Lock,
+  User,
+  LayoutDashboard,
+  MessageSquare,
+  TrendingUp,
   Calendar,
   Zap,
   Shield,
@@ -79,7 +79,7 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { staggerChildren: 0.1 }
     }
@@ -87,8 +87,8 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
 
   const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
       transition: { duration: 0.5, ease: "easeOut" }
     }
@@ -96,14 +96,14 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
 
   return (
     <div className="min-h-screen bg-bg-dark text-white font-sans selection:bg-brand-primary/30 flex flex-col relative overflow-hidden">
-      
+
       {/* Background Blobs */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-brand-secondary/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* TOP NAV */}
       <nav className="relative z-50 flex justify-between items-center px-6 md:px-12 py-6">
-        <motion.div 
+        <motion.div
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className="flex items-center gap-2 group cursor-default"
@@ -116,30 +116,30 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
           </h1>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400"
         >
-          <button 
-            onClick={() => setView("hero")} 
+          <button
+            onClick={() => setView("hero")}
             className={`transition-colors ${view === "hero" ? "text-white" : "hover:text-white"}`}
           >
             Home
           </button>
-          <button 
-            onClick={() => setView("features")} 
+          <button
+            onClick={() => setView("features")}
             className={`transition-colors ${view === "features" ? "text-white" : "hover:text-white"}`}
           >
             Features
           </button>
-          <button 
-            onClick={() => setView("how-it-works")} 
+          <button
+            onClick={() => setView("how-it-works")}
             className={`transition-colors ${view === "how-it-works" ? "text-white" : "hover:text-white"}`}
           >
             How it works
           </button>
-          <button 
+          <button
             onClick={() => {
               setView("hero");
               setIsLogin(!isLogin);
@@ -155,7 +155,7 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-7xl mx-auto w-full">
         <AnimatePresence mode="wait">
           {view === "hero" && (
-            <motion.div 
+            <motion.div
               key="hero"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -163,157 +163,157 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
               transition={{ duration: 0.5 }}
               className="w-full grid lg:grid-cols-2 gap-16 items-center"
             >
-          
-          {/* LEFT SIDE: Copy */}
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-8"
-          >
-            <motion.div variants={itemVariants}>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-semibold uppercase tracking-wider mb-4">
-                <Rocket className="w-3 h-3" />
-                Next-Gen Academic Assistant
-              </span>
-              <h2 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight">
-                Unlock Your <br />
-                <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
-                  Full Potential
-                </span>
-              </h2>
-              <p className="text-lg text-gray-400 mt-6 max-w-lg leading-relaxed">
-                Empower your educational journey with real-time grade analytics, smart scheduling, and AI-driven personalized advice.
-              </p>
-            </motion.div>
 
-            <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
-              {[
-                { icon: MessageSquare, text: "AI Study Advisor" },
-                { icon: Calendar, text: "Smart Planner" },
-                { icon: TrendingUp, text: "Grade Analytics" },
-                { icon: LayoutDashboard, text: "Central Dashboard" }
-              ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3 group">
-                  <div className="p-2 rounded-lg bg-white/5 group-hover:bg-brand-primary/20 transition-colors">
-                    <feature.icon className="w-5 h-5 text-brand-primary" />
+              {/* LEFT SIDE: Copy */}
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-8"
+              >
+                <motion.div variants={itemVariants}>
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-semibold uppercase tracking-wider mb-4">
+                    <Rocket className="w-3 h-3" />
+                    Next-Gen Academic Assistant
+                  </span>
+                  <h2 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight">
+                    Unlock Your <br />
+                    <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
+                      Full Potential
+                    </span>
+                  </h2>
+                  <p className="text-lg text-gray-400 mt-6 max-w-lg leading-relaxed">
+                    Empower your educational journey with real-time grade analytics, smart scheduling, and AI-driven personalized advice.
+                  </p>
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+                  {[
+                    { icon: MessageSquare, text: "AI Study Advisor" },
+                    { icon: Calendar, text: "Smart Planner" },
+                    { icon: TrendingUp, text: "Grade Analytics" },
+                    { icon: LayoutDashboard, text: "Central Dashboard" }
+                  ].map((feature, i) => (
+                    <div key={i} className="flex items-center gap-3 group">
+                      <div className="p-2 rounded-lg bg-white/5 group-hover:bg-brand-primary/20 transition-colors">
+                        <feature.icon className="w-5 h-5 text-brand-primary" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-300">{feature.text}</span>
+                    </div>
+                  ))}
+                </motion.div>
+              </motion.div>
+
+              {/* RIGHT SIDE: Auth Card */}
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="relative"
+              >
+                {/* Card Glow */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-brand-primary/20 to-brand-secondary/20 rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+
+                <div className="relative glass-card-vibrant p-10 md:p-12 shadow-2xl">
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold">
+                      {isLogin ? "Welcome Back" : "Join the Future"}
+                    </h3>
+                    <p className="text-gray-400 text-sm mt-2">
+                      {isLogin
+                        ? "Enter your credentials to access your dashboard"
+                        : "Create an account to start your AI-powered journey"}
+                    </p>
                   </div>
-                  <span className="text-sm font-medium text-gray-300">{feature.text}</span>
-                </div>
-              ))}
-            </motion.div>
-          </motion.div>
 
-          {/* RIGHT SIDE: Auth Card */}
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="relative"
-          >
-            {/* Card Glow */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-            
-            <div className="relative glass-card p-8 md:p-10 shadow-2xl">
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold">
-                  {isLogin ? "Welcome Back" : "Join the Future"}
-                </h3>
-                <p className="text-gray-400 text-sm mt-2">
-                  {isLogin 
-                    ? "Enter your credentials to access your dashboard" 
-                    : "Create an account to start your AI-powered journey"}
-                </p>
-              </div>
-
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl mb-6 text-sm flex items-center gap-2"
-                  >
-                    <CheckCircle2 className="w-4 h-4 rotate-180" />
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="space-y-4">
-                {!isLogin && (
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600"
-                    />
-                  </div>
-                )}
-
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50"
-                  />
-                </div>
-
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="w-full relative group mt-4"
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
-                  <div className="relative w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? (
-                      <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        {isLogin ? "Sign In" : "Get Started"}
-                        <ArrowRight className="w-5 h-5" />
-                      </>
+                  <AnimatePresence mode="wait">
+                    {error && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl mb-6 text-sm flex items-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4 rotate-180" />
+                        {error}
+                      </motion.div>
                     )}
-                  </div>
-                </button>
-              </div>
+                  </AnimatePresence>
 
-              <div className="mt-8 pt-6 border-t border-white/5 text-center">
-                <button 
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
-                >
-                  {isLogin 
-                    ? "Don't have an account? Register now" 
-                    : "Already have an account? Sign in"}
-                </button>
-              </div>
-            </div>
-          </motion.div>
+                  <div className="space-y-4">
+                    {!isLogin && (
+                      <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600"
+                        />
+                      </div>
+                    )}
+
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50"
+                      />
+                    </div>
+
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand-primary transition-colors" />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:border-brand-primary transition-all placeholder:text-gray-600 disabled:opacity-50"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="w-full relative group mt-4"
+                    >
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
+                      <div className="relative w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                        {loading ? (
+                          <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            {isLogin ? "Sign In" : "Get Started"}
+                            <ArrowRight className="w-5 h-5" />
+                          </>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                    <button
+                      onClick={() => setIsLogin(!isLogin)}
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                      {isLogin
+                        ? "Don't have an account? Register now"
+                        : "Already have an account? Sign in"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           )}
 
           {view === "features" && (
-            <motion.div 
+            <motion.div
               key="features"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -381,7 +381,7 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
           )}
 
           {view === "how-it-works" && (
-            <motion.div 
+            <motion.div
               key="how-it-works"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -448,7 +448,7 @@ export default function HomePage({ onLoginSuccess }: { onLoginSuccess: (user: an
       {/* FOOTER */}
       <footer className="relative z-10 px-6 py-8 border-t border-white/5 text-center">
         <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} ScholarSync. Built for academic excellence.
+          &copy; {new Date().getFullYear()} ScholarSync. Built for academic excellence. || <span className="text-brand-primary font-bold">Arkeya</span>
         </p>
       </footer>
     </div>
