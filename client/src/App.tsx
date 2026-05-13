@@ -10,6 +10,8 @@ import Chatbot from "./pages/Chatbot";
 import ChatHistory from "./pages/ChatHistory";
 import Settings from "./pages/Settings";
 import { supabase, getSession, signOut, getCourses, getStudyLogs, getAssessments } from "./lib/supabase-simple";
+import { API_URL } from "./lib/config";
+
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -31,7 +33,8 @@ export default function App() {
       console.log("Checking server connection...");
       try {
         const healthRes = await Promise.race([
-          fetch('http://localhost:5000/api/health'),
+          fetch(`${API_URL}/health`),
+
           new Promise((_, reject) => setTimeout(() => reject(new Error("Health check timeout")), 2000))
         ]) as any;
         const healthData = await healthRes.json();

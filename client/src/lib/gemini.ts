@@ -1,7 +1,8 @@
 import { getSession } from './supabase-simple';
 import type { Database } from '../types/supabase';
 
-const API_URL = 'http://localhost:5000/api';
+import { API_URL } from './config';
+
 
 // ============================================
 // TYPES
