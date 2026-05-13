@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
+import { getStudentDataForAI, saveChatMessage, getChatHistory, clearChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,7 +16,8 @@ import {
   Lightbulb,
   Target,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from "lucide-react";
 
 interface Message {
@@ -80,6 +81,26 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
     }
   };
 
+  const clearHistory = async () => {
+    if (!window.confirm("Are you sure you want to clear your chat history?")) return;
+    try {
+      setLoading(true);
+      await clearChatHistory();
+      setMessages([
+        {
+          id: "welcome",
+          sender: "ai",
+          text: "History cleared. How can I help you start fresh?",
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err) {
+      console.error("Error clearing history:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const quickSuggestions = [
     { text: "Improve my grades", icon: TrendingUp },
     { text: "Study plan for me", icon: Clock },
@@ -110,10 +131,18 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
 
       const studentData = await getStudentDataForAI();
 
+      // Use the messages state from BEFORE the update to ensure correct history order
+      const history = messages
+        .filter(m => m.id !== 'welcome')
+        .map(m => ({ 
+          role: (m.sender === 'user' ? 'user' : 'assistant') as "user" | "assistant", 
+          content: m.text 
+        }));
+
       const aiResponse = await getAIAdvice(
         studentData,
         messageText,
-        messages.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+        history,
         selectedModel
       );
 
@@ -173,6 +202,8 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                 >
                   <option value="gemini-2.5-flash" className="bg-bg-card text-tx-main">Gemini 2.5 Flash</option>
                   <option value="gemini-2.0-flash" className="bg-bg-card text-tx-main">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-flash" className="bg-bg-card text-tx-main">Gemini 1.5 Flash (Stable)</option>
+                  <option value="gemini-1.5-pro" className="bg-bg-card text-tx-main">Gemini 1.5 Pro</option>
                   <option value="gemini-flash-latest" className="bg-bg-card text-tx-main">Latest Flash</option>
                 </select>
 
@@ -190,6 +221,14 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={clearHistory}
+            className="p-2.5 hover:bg-red-500/10 rounded-xl transition text-gray-400 hover:text-red-500"
+            title="Clear Chat"
+            disabled={loading}
+          >
+            <Trash2 className="w-5 h-5" />
           </button>
           <button
             className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
