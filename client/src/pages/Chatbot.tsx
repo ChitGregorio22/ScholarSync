@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
 import { motion, AnimatePresence } from "framer-motion";
@@ -221,16 +222,21 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                   : "bg-bg-hover border border-border-subtle text-tx-main rounded-bl-none shadow-inner"
                   }`}>
                   {msg.sender === "ai" ? (
-                    <div className="markdown-content">
+                    <div className="markdown-content whitespace-pre-wrap">
                       <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
                         components={{
-                          p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                          ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2" {...props} />,
-                          ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
+                          h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-3 mt-4 text-tx-main" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2 mt-3 text-tx-main" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2 mt-2 text-tx-main" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc ml-5 mb-3 space-y-1" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal ml-5 mb-3 space-y-1" {...props} />,
                           li: ({node, ...props}) => <li className="mb-1" {...props} />,
                           strong: ({node, ...props}) => <strong className="font-bold text-brand-primary" {...props} />,
-                          code: ({node, ...props}) => <code className="bg-white/10 px-1 rounded text-xs font-mono" {...props} />,
+                          code: ({node, ...props}) => <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-brand-primary" {...props} />,
+                          hr: ({node, ...props}) => <hr className="border-white/10 my-4" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-brand-primary/30 pl-4 italic my-2 text-tx-dim" {...props} />,
                         }}
                       >
                         {msg.text}
