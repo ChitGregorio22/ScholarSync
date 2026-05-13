@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { authenticateUser } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/history', authenticateUser, async (req, res) => {
+router.get('/history', authenticateUser, async (req: Request, res: Response) => {
   const user = (req as any).user;
   const supabase = (req as any).supabase;
   try {
@@ -13,7 +13,7 @@ router.get('/history', authenticateUser, async (req, res) => {
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-router.post('/', authenticateUser, async (req, res) => {
+router.post('/', authenticateUser, async (req: Request, res: Response) => {
   const user = (req as any).user;
   const supabase = (req as any).supabase;
   try {
@@ -23,7 +23,7 @@ router.post('/', authenticateUser, async (req, res) => {
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-router.delete('/history', authenticateUser, async (req, res) => {
+router.delete('/history', authenticateUser, async (req: Request, res: Response) => {
   const user = (req as any).user;
   const supabase = (req as any).supabase;
   try {
