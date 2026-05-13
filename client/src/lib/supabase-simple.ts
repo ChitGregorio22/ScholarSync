@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { API_URL } from './config';
+
 
 // --- TYPES ---
 export interface Course {
@@ -29,7 +31,7 @@ export interface ChatMessage {
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const API_URL = 'http://localhost:5000/api';
+
 
 // Singleton pattern to avoid "Multiple GoTrueClient instances" warning
 if (!(window as any)._supabaseInstance) {
