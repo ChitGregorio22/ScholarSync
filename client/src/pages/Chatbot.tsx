@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { getStudentDataForAI, saveChatMessage, getChatHistory, clearChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,7 +16,8 @@ import {
   Lightbulb,
   Target,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from "lucide-react";
 
 interface Message {
@@ -48,6 +52,7 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(initialFullscreen);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Load chat history on mount
@@ -74,6 +79,26 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
       }
     } catch (err) {
       console.error("Error loading chat history:", err);
+    }
+  };
+
+  const clearHistory = async () => {
+    setShowClearConfirm(false);
+    try {
+      setLoading(true);
+      await clearChatHistory();
+      setMessages([
+        {
+          id: "welcome",
+          sender: "ai",
+          text: "History cleared. How can I help you start fresh?",
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err) {
+      console.error("Error clearing history:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,10 +132,18 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
 
       const studentData = await getStudentDataForAI();
 
+      // Use the messages state from BEFORE the update to ensure correct history order
+      const history = messages
+        .filter(m => m.id !== 'welcome')
+        .map(m => ({ 
+          role: (m.sender === 'user' ? 'user' : 'assistant') as "user" | "assistant", 
+          content: m.text 
+        }));
+
       const aiResponse = await getAIAdvice(
         studentData,
         messageText,
-        messages.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+        history,
         selectedModel
       );
 
@@ -170,6 +203,8 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                 >
                   <option value="gemini-2.5-flash" className="bg-bg-card text-tx-main">Gemini 2.5 Flash</option>
                   <option value="gemini-2.0-flash" className="bg-bg-card text-tx-main">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-flash" className="bg-bg-card text-tx-main">Gemini 1.5 Flash (Stable)</option>
+                  <option value="gemini-1.5-pro" className="bg-bg-card text-tx-main">Gemini 1.5 Pro</option>
                   <option value="gemini-flash-latest" className="bg-bg-card text-tx-main">Latest Flash</option>
                 </select>
 
@@ -189,12 +224,56 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
           <button
+            onClick={() => setShowClearConfirm(true)}
+            className="p-2.5 hover:bg-red-500/10 rounded-xl transition text-gray-400 hover:text-red-500"
+            title="Clear Chat"
+            disabled={loading || showClearConfirm}
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+          <button
             className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
             title="View History"
           >
             <History className="w-5 h-5" />
           </button>
         </div>
+
+        {/* CUSTOM CLEAR CONFIRMATION OVERLAY */}
+        <AnimatePresence>
+          {showClearConfirm && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute inset-0 z-50 bg-bg-card/95 backdrop-blur-sm flex items-center justify-between px-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500/10 p-2 rounded-lg">
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Clear all messages?</p>
+                  <p className="text-[10px] text-tx-dim uppercase tracking-wider font-bold">This cannot be undone</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-4 py-2 text-xs font-bold hover:bg-white/5 rounded-xl transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={clearHistory}
+                  className="px-4 py-2 text-xs font-bold bg-red-500 text-white rounded-xl hover:bg-red-600 transition shadow-lg shadow-red-500/20"
+                >
+                  Clear History
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* CHAT AREA */}
@@ -218,7 +297,30 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                   ? "bg-brand-primary text-white rounded-br-none"
                   : "bg-bg-hover border border-border-subtle text-tx-main rounded-bl-none shadow-inner"
                   }`}>
-                  {msg.text}
+                  {msg.sender === "ai" ? (
+                    <div className="markdown-content whitespace-pre-wrap">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                        components={{
+                          p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
+                          h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-3 mt-4 text-tx-main" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2 mt-3 text-tx-main" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2 mt-2 text-tx-main" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc ml-5 mb-3 space-y-1" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal ml-5 mb-3 space-y-1" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-bold text-brand-primary" {...props} />,
+                          code: ({node, ...props}) => <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-brand-primary" {...props} />,
+                          hr: ({node, ...props}) => <hr className="border-white/10 my-4" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-brand-primary/30 pl-4 italic my-2 text-tx-dim" {...props} />,
+                        }}
+                      >
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.text
+                  )}
                 </div>
                 <span className={`text-[10px] text-tx-muted font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
