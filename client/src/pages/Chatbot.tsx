@@ -52,6 +52,7 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(initialFullscreen);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Load chat history on mount
@@ -82,7 +83,7 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
   };
 
   const clearHistory = async () => {
-    if (!window.confirm("Are you sure you want to clear your chat history?")) return;
+    setShowClearConfirm(false);
     try {
       setLoading(true);
       await clearChatHistory();
@@ -223,20 +224,50 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
           <button
-            onClick={clearHistory}
+            onClick={() => setShowClearConfirm(true)}
             className="p-2.5 hover:bg-red-500/10 rounded-xl transition text-gray-400 hover:text-red-500"
             title="Clear Chat"
-            disabled={loading}
+            disabled={loading || showClearConfirm}
           >
             <Trash2 className="w-5 h-5" />
           </button>
-          <button
-            className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
-            title="View History"
-          >
-            <History className="w-5 h-5" />
-          </button>
         </div>
+
+        {/* CUSTOM CLEAR CONFIRMATION OVERLAY */}
+        <AnimatePresence>
+          {showClearConfirm && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute inset-0 z-50 bg-bg-card/95 backdrop-blur-sm flex items-center justify-between px-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500/10 p-2 rounded-lg">
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Clear all messages?</p>
+                  <p className="text-[10px] text-tx-dim uppercase tracking-wider font-bold">This cannot be undone</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-4 py-2 text-xs font-bold hover:bg-white/5 rounded-xl transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={clearHistory}
+                  className="px-4 py-2 text-xs font-bold bg-red-500 text-white rounded-xl hover:bg-red-600 transition shadow-lg shadow-red-500/20"
+                >
+                  Clear History
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* CHAT AREA */}
