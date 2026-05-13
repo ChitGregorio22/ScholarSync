@@ -8,14 +8,17 @@ const router = Router();
 router.post('/advice', authenticateUser, async (req: Request, res: Response) => {
   const { prompt, history, modelType } = req.body;
   
-  // Using a wide range of models to ensure compatibility
-  const modelsToTry = modelType ? [modelType] : [
-    "gemini-2.5-flash", 
+  // Prioritize the selected model if provided, but always include fallbacks for reliability
+  const fallbacks = [
     "gemini-2.0-flash", 
     "gemini-1.5-flash", 
     "gemini-1.5-pro",
     "gemini-flash-latest"
   ];
+  
+  const modelsToTry = modelType 
+    ? [modelType, ...fallbacks.filter(m => m !== modelType)] 
+    : ["gemini-2.5-flash", ...fallbacks];
   
   for (const modelName of modelsToTry) {
     try {
