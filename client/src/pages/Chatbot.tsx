@@ -231,6 +231,12 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
           >
             <Trash2 className="w-5 h-5" />
           </button>
+          <button
+            className="p-2.5 hover:bg-white/5 rounded-xl transition text-gray-400 hover:text-white"
+            title="View History"
+          >
+            <History className="w-5 h-5" />
+          </button>
         </div>
 
         {/* CUSTOM CLEAR CONFIRMATION OVERLAY */}
