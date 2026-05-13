@@ -8,17 +8,17 @@ const router = Router();
 router.post('/advice', authenticateUser, async (req: Request, res: Response) => {
   const { prompt, history, modelType } = req.body;
   
-  // Prioritize the selected model if provided, but always include fallbacks for reliability
+  // Using the latest stable models from the 2026 environment list
   const fallbacks = [
-    "gemini-2.0-flash", 
-    "gemini-1.5-flash", 
-    "gemini-1.5-pro",
+    "gemini-3.1-flash-lite", 
+    "gemini-2.5-flash", 
+    "gemini-2.0-flash",
     "gemini-flash-latest"
   ];
   
   const modelsToTry = modelType 
     ? [modelType, ...fallbacks.filter(m => m !== modelType)] 
-    : ["gemini-2.5-flash", ...fallbacks];
+    : ["gemini-3.1-flash-lite", ...fallbacks];
   
   for (const modelName of modelsToTry) {
     try {
