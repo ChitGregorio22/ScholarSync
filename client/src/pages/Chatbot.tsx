@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { getStudentDataForAI, saveChatMessage, getChatHistory } from "../lib/supabase-simple";
 import { getAIAdvice } from "../lib/gemini";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,7 +220,24 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                   ? "bg-brand-primary text-white rounded-br-none"
                   : "bg-bg-hover border border-border-subtle text-tx-main rounded-bl-none shadow-inner"
                   }`}>
-                  {msg.text}
+                  {msg.sender === "ai" ? (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      className="markdown-content"
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold text-brand-primary" {...props} />,
+                        code: ({node, ...props}) => <code className="bg-white/10 px-1 rounded text-xs font-mono" {...props} />,
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.text
+                  )}
                 </div>
                 <span className={`text-[10px] text-tx-muted font-medium mt-1.5 block px-1 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
