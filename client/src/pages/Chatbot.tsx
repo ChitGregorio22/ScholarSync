@@ -51,7 +51,7 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(initialFullscreen);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.1-flash-lite");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -201,10 +201,11 @@ export default function Chatbot({ onBack, isFullscreen: initialFullscreen = fals
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="bg-transparent text-[10px] text-tx-dim border-none focus:ring-0 p-0 cursor-pointer hover:text-tx-main transition-colors uppercase tracking-widest font-bold"
                 >
+                  <option value="gemini-3.1-flash-lite" className="bg-bg-card text-tx-main">Gemini 3.1 Flash Lite (Fastest)</option>
                   <option value="gemini-2.5-flash" className="bg-bg-card text-tx-main">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.5-pro" className="bg-bg-card text-tx-main">Gemini 2.5 Pro (Powerful)</option>
                   <option value="gemini-2.0-flash" className="bg-bg-card text-tx-main">Gemini 2.0 Flash</option>
-                  <option value="gemini-1.5-flash" className="bg-bg-card text-tx-main">Gemini 1.5 Flash (Stable)</option>
-                  <option value="gemini-1.5-pro" className="bg-bg-card text-tx-main">Gemini 1.5 Pro</option>
+                  <option value="gemini-1.5-flash" className="bg-bg-card text-tx-main">Gemini 1.5 Flash (Legacy)</option>
                   <option value="gemini-flash-latest" className="bg-bg-card text-tx-main">Latest Flash</option>
                 </select>
 

@@ -8,14 +8,17 @@ const router = Router();
 router.post('/advice', authenticateUser, async (req: Request, res: Response) => {
   const { prompt, history, modelType } = req.body;
   
-  // Using a wide range of models to ensure compatibility
-  const modelsToTry = modelType ? [modelType] : [
+  // Using the latest stable models from the 2026 environment list
+  const fallbacks = [
+    "gemini-3.1-flash-lite", 
     "gemini-2.5-flash", 
-    "gemini-2.0-flash", 
-    "gemini-1.5-flash", 
-    "gemini-1.5-pro",
+    "gemini-2.0-flash",
     "gemini-flash-latest"
   ];
+  
+  const modelsToTry = modelType 
+    ? [modelType, ...fallbacks.filter(m => m !== modelType)] 
+    : ["gemini-3.1-flash-lite", ...fallbacks];
   
   for (const modelName of modelsToTry) {
     try {
